@@ -406,7 +406,7 @@ takenMap[tk.weaponIdx] = true;
 
 // draw weapon rack on left side of field
 // hides weapons already taken by knights
-var rackX = 225;
+var rackX = 195;
 var rackY = 265;
 window.KnightArt.drawWeaponRack(
 ctx,
@@ -416,12 +416,15 @@ takenMap
 );
 
 // collect riders to draw in y-depth order
-// staggered checkerboard gives room for scale
+// lower row shifted down and left for space
 var drawQueue = [];
 for (var i = 0; i < list.length; i++) {
 var lk = list[i];
-var slotX = 520 + i * 180;
-var slotY = i % 2 === 0 ? 302 : 374;
+var colIdx = Math.floor(i / 2);
+var isLow = i % 2 === 1;
+var slotX =
+(isLow ? 635 : 500) + colIdx * 340;
+var slotY = isLow ? 426 : 292;
 
 if (p.finished || i < curIdx) {
 drawQueue.push({
