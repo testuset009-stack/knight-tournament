@@ -2264,10 +2264,15 @@ return;
 }
 
 if (type === 'toggle_mode') {
+var reqMode = body.mode;
+if (reqMode === 'PUB' || reqMode === 'CASH') {
+gameState.gameMode = reqMode;
+} else {
 gameState.gameMode =
 gameState.gameMode === 'PUB'
 ? 'CASH'
 : 'PUB';
+}
 pubData.gameMode = gameState.gameMode;
 savePubData(pubData);
 } else if (type === 'toggle_live_bets') {
@@ -2428,36 +2433,95 @@ var kId = body.knightId;
 var amt = parseInt(body.amount, 10);
 var bType = body.betType || 'MATCH';
 
+// check all impossible bet states first
+// returns specific errorCode to host ui
+var errCode = '';
+var tablesArr = pubData.tables || [];
 var tableObj = null;
 for (
 var i = 0;
-i < pubData.tables.length;
+i < tablesArr.length;
 i++
 ) {
-if (pubData.tables[i].id === tId) {
-tableObj = pubData.tables[i];
+if (tablesArr[i].id === tId) {
+tableObj = tablesArr[i];
 }
 }
 
-if (
-tableObj &&
-amt > 0 &&
-tableObj.balance >= amt
-) {
-var m =
+var curMatch =
+gameState.matches &&
 gameState.matches[
 gameState.currentMatchIndex
 ];
-var kName = kId;
-var lockedOdds = 1.9;
+var cState = gameState.combat || {};
+var stepWaitSec =
+cState.stepElapsedMs !== undefined
+? cState.stepElapsedMs / 1000
+: (Date.now() -
+(gameState.lastStepAt || 0)) /
+1000;
+var minRevealSec =
+cState.mode === 'JOUST' ? 3.25 : 4.75;
 
-if (bType === 'MATCH' && m) {
-if (m.k1 && m.k1.id === kId) {
-kName = m.k1.name;
-lockedOdds = parseFloat(m.odds1);
-} else if (m.k2 && m.k2.id === kId) {
-kName = m.k2.name;
-lockedOdds = parseFloat(m.odds2);
+if (tablesArr.length === 0) {
+errCode = 'NO_TABLES';
+} else if (!tableObj) {
+errCode = 'NO_TABLE_SELECTED';
+} else if (gameState.tvScreen === 'WAITING') {
+errCode = 'WAITING_SCREEN';
+} else if (
+gameState.tournamentStatus === 'FINISHED'
+) {
+errCode = 'TOUR_FINISHED';
+} else if (
+bType === 'MATCH' &&
+(!curMatch ||
+curMatch.status === 'DONE' ||
+cState.finished)
+) {
+errCode = 'BOUT_DONE';
+} else if (
+gameState.tvScreen === 'COMBAT' &&
+!gameState.allowLiveBets
+) {
+errCode = 'LIVE_BETS_OFF';
+} else if (
+gameState.tvScreen === 'COMBAT' &&
+(!cState.pausedForBets ||
+stepWaitSec < minRevealSec)
+) {
+errCode = 'PASS_IN_PROGRESS';
+} else if (!kId) {
+errCode = 'NO_KNIGHT_SELECTED';
+} else if (!amt || amt <= 0) {
+errCode = 'BAD_AMOUNT';
+} else if (tableObj.balance < amt) {
+errCode = 'LOW_BALANCE';
+}
+
+var kName = '';
+var lockedOdds = 1.9;
+var foundKnight = false;
+
+if (!errCode) {
+if (bType === 'MATCH' && curMatch) {
+if (
+curMatch.k1 &&
+curMatch.k1.id === kId
+) {
+kName = curMatch.k1.name;
+lockedOdds = parseFloat(curMatch.odds1);
+foundKnight = true;
+} else if (
+curMatch.k2 &&
+curMatch.k2.id === kId
+) {
+kName = curMatch.k2.name;
+lockedOdds = parseFloat(curMatch.odds2);
+foundKnight = true;
+}
+if (!foundKnight) {
+errCode = 'NO_KNIGHT_SELECTED';
 }
 } else {
 for (
@@ -2471,8 +2535,22 @@ kName = ak.name;
 lockedOdds = parseFloat(
 ak.outrightOdds
 );
+foundKnight = true;
 }
 }
+if (!foundKnight) {
+errCode = 'KNIGHT_ELIMINATED';
+}
+}
+}
+
+if (errCode) {
+res.json({
+ok: false,
+errorCode: errCode,
+state: buildClientResponse()
+});
+return;
 }
 
 // apply parade bonus: gift on win or +20%
@@ -2508,7 +2586,6 @@ paradeGift: paradeGift
 gameState.soundToPlay = 'bet';
 savePubData(pubData);
 updateAllOdds(gameState);
-}
 } else if (type === 'cancel_bet') {
 // remove mistaken bet and refund table
 // recalculates live odds after removal

@@ -29,10 +29,10 @@
 </div>
 
 <div class="card formCard hidden" id="createPubFormCard">
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <input type="text" id="newPubNameInput" placeholder="Pub name (e.g. Old Oak)">
 </div>
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <input type="number" id="newPubSeedInput" placeholder="Seed (optional, e.g. 257)">
 </div>
 <div class="btnGrid grid2" style="margin-top:8px;margin-bottom:0;">
@@ -78,6 +78,13 @@
 <button class="btn btnPurple btnFull hidden" id="btnNewTourLive">NEW TOURNEY (8 OF 24)</button>
 </div>
 
+<div class="stickyTableBar" id="stickyTableBar">
+<div class="stickyTableHeader">
+<span class="stickyTableLbl" id="lblWhoBets">ACTIVE TABLE / PLAYER:</span>
+</div>
+<select id="selectTable" class="selectBox"></select>
+</div>
+
 <div class="sectionTitle" id="secBetTitle">PLACE BETS (BOUT OR TOURNAMENT)</div>
 <div class="card formCard">
 <div class="btnGrid grid2">
@@ -85,11 +92,8 @@
 <button class="btn btnSmallTab" id="tabBetOutright">ON TOURNEY CHAMPION</button>
 </div>
 
-<div class="fieldLabel" id="lblWhoBets">WHO BETS (TABLE / PLAYER):</div>
-<select id="selectTable" class="selectBox"></select>
-
-<div class="fieldLabel" id="lblWhichKnight">BET ON WHICH KNIGHT:</div>
-<select id="selectKnight" class="selectBox"></select>
+<div class="fieldLabel" id="lblWhichKnight">TAP KNIGHT TO BET ON:</div>
+<div id="knightVisualGrid" class="knightGrid"></div>
 
 <div class="fieldLabel" id="lblBetAmt">BET AMOUNT:</div>
 <div class="btnGrid grid4">
@@ -98,10 +102,11 @@
 <button class="btn btnChip" data-amt="5">5</button>
 <button class="btn btnChip" data-amt="10">10</button>
 </div>
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <input type="number" id="betAmountInput" value="1" min="1" placeholder="Bet amount">
 <button class="btn btnGreen btnAcceptBet" id="btnPlaceBet">PLACE BET</button>
 </div>
+<div id="betStatusMsg" class="cfgMsg hidden"></div>
 
 <div class="fieldLabel" id="lblActiveBets" style="margin-top:12px;">ACTIVE BETS (✕ CANCEL & REFUND):</div>
 <div id="hostActiveBetsList" class="cfgList"></div>
@@ -111,21 +116,21 @@
 <div class="card formCard">
 <div class="fieldLabel" id="creditLabel">AWARD CAPS FOR BAR ORDER:</div>
 <div id="pubOrderQuickBtns" class="quickOrderWrap"></div>
-<div id="cashDepositRow" class="inputRow hidden">
+<div id="cashDepositRow" class="inputRow wrapInputRow hidden">
 <input type="number" id="cashDepositInput" value="10" min="1" placeholder="Cash amount">
 <button class="btn btnCopper btnSmallAdd" id="btnAddCashDeposit">+ DEPOSIT</button>
 </div>
 
 <div id="prizeRedeemBlock">
 <div class="fieldLabel" id="lblRedeemPrize">AWARD BAR PRIZE TO SELECTED TABLE:</div>
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <select id="selectPrize" class="selectBox"></select>
 <button class="btn btnBlue btnRedeem" id="btnClaimPrize">AWARD PRIZE</button>
 </div>
 </div>
 
 <div class="fieldLabel" id="lblAddTable">ADD NEW TABLE OR PLAYER:</div>
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <input type="text" id="newTableName" placeholder="E.g. Table #1 or Bar Counter">
 <button class="btn btnDark btnSmallAdd" id="btnAddTable">+ TABLE</button>
 </div>
@@ -141,79 +146,159 @@
 <button class="btn btnGreen btnLangSmall" id="btnBackToGame">← BACK TO GAME</button>
 </div>
 
-<div class="sectionTitle" id="secModeLiveTitle">BETTING MODE & LIVE BETS</div>
+<div class="sectionTitle" id="secModeLiveTitle">ECONOMY & BETTING RULES</div>
 <div class="card formCard">
-<div class="btnGrid grid2" style="margin-bottom:0;">
-<button class="btn btnBlue" id="btnToggleMode">MODE: PUB / CASH</button>
-<button class="btn btnPurple" id="btnLiveToggle">LIVE BETS: ON</button>
+<div class="settingBlock">
+<div class="settingTitle" id="setGameModeTitle">Venue Economy Mode</div>
+<div class="settingDesc" id="setGameModeDesc">Choose how guests place bets.</div>
+<div class="btnGrid grid2" style="margin-top:8px;margin-bottom:0;">
+<button class="btn btnSmallTab activeTab" id="tabModePub">PUB (CAPS & PRIZES)</button>
+<button class="btn btnSmallTab" id="tabModeCash">CASH (DEPOSIT BANK)</button>
+</div>
+</div>
+
+<div class="settingDivider"></div>
+
+<div class="switchSettingRow">
+<div class="switchSettingInfo">
+<div class="settingTitle" id="setLiveBetsTitle">Live In-Bout Betting</div>
+<div class="settingDesc" id="setLiveBetsDesc">Pause after each lance pass to accept live bets.</div>
+</div>
+<button type="button" class="switchPill switchOn" id="btnLiveToggle">
+<span class="switchKnob"></span>
+<span class="switchTxt" id="liveSwitchTxt">ON</span>
+</button>
 </div>
 </div>
 
 <div class="sectionTitle" id="secParadeBonusTitle">PARADE BET BONUS MODE</div>
 <div class="card formCard">
-<div class="btnGrid grid2">
+<div class="settingTitle" id="setParadeBonusTitle">Parade Early-Bet Bonus</div>
+<div class="settingDesc" id="setParadeBonusDesc">Rewards guests who place opening bets during the Knights Parade.</div>
+<div class="btnGrid grid2" style="margin-top:8px;">
 <button class="btn btnSmallTab activeTab" id="tabParade20">+20% CAPS ODDS</button>
 <button class="btn btnSmallTab" id="tabParadeGift">GIFT ON WIN</button>
 </div>
-<div id="paradeGiftInputWrap" class="inputRow hidden">
+<div class="settingHintBox" id="paradeModeHintText">All bets placed during the Parade automatically receive +20% boosted payout odds.</div>
+<div id="paradeGiftInputWrap" class="inputRow wrapInputRow hidden">
 <input type="text" id="paradeGiftInput" placeholder="Enter gift name (required for Gift mode)">
 </div>
 <div id="paradeBonusMsg" class="cfgMsg hidden"></div>
 <button class="btn btnGreen btnFull" id="btnSaveParadeBonus" style="margin-top:8px;">SAVE PARADE BONUS</button>
 </div>
 
-<div class="sectionTitle" id="secOrderGridTitle">PURCHASE BONUS GRID (ITEM / CAPS)</div>
+<div class="sectionTitle" id="secOrderGridTitle">BAR ORDER BONUS GRID</div>
 <div class="card formCard">
+<div class="settingDesc" id="setOrderCardDesc" style="margin-bottom:8px;">Add menu items and how many caps they grant.</div>
 <div id="orderGridList" class="cfgList"></div>
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <input type="text" id="orderItemInput" placeholder="Item (e.g. Stout)">
 <input type="number" id="orderCapsInput" class="numShortInput" min="1" placeholder="Caps">
 <button class="btn btnCopper btnSmallAdd" id="btnAddOrderItem">+ ITEM</button>
 </div>
 </div>
 
-<div class="sectionTitle" id="secPrizeGridTitle">PRIZE GRID (CAPS COST / PRIZE)</div>
+<div class="sectionTitle" id="secPrizeGridTitle">PUB PRIZE SHOWCASE</div>
 <div class="card formCard">
+<div class="settingDesc" id="setPrizeCardDesc" style="margin-bottom:8px;">Add bar rewards and their cost in caps.</div>
 <div id="prizeGridList" class="cfgList"></div>
-<div class="inputRow">
+<div class="inputRow wrapInputRow">
 <input type="number" id="prizeCostInput" class="numShortInput" min="1" placeholder="Caps">
 <input type="text" id="prizeTitleInput" placeholder="Prize name">
 <button class="btn btnBlue btnSmallAdd" id="btnAddPrizeItem">+ PRIZE</button>
 </div>
 </div>
 
-<div class="sectionTitle" id="secTourCtrlTitle">TOURNAMENT & EVENING RESET</div>
+<div class="sectionTitle" id="secTourCtrlTitle">TOURNAMENT & EVENING ACTIONS</div>
 <div class="card formCard">
-<div class="btnGrid grid2">
-<button class="btn btnCopper" id="btnReplayParade">RESTART PARADE</button>
-<button class="btn btnPurple" id="btnNewTour">NEW TOURNEY (8 OF 24)</button>
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actRestartParadeTitle">Restart Knights Parade</div>
+<div class="settingDesc" id="actRestartParadeDesc">Rewinds the TV screen back to the opening Knights Parade.</div>
 </div>
-<div class="btnGrid grid2" style="margin-bottom:0;">
-<button class="btn btnCopper" id="btnClearTables">CLEAR ALL TABLES (NEW NIGHT)</button>
-<button class="btn btnRed" id="btnNewSeed">CHANGE PUB SEED</button>
+<button class="btn btnActionWarn" id="btnReplayParade">Restart Parade</button>
+</div>
+
+<div class="settingDivider"></div>
+
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actNewTourTitle">New Tournament (8 of 24)</div>
+<div class="settingDesc" id="actNewTourDesc">Draws 8 contenders from the pub’s 24-knight pool and starts a new bracket.</div>
+</div>
+<button class="btn btnActionPrimary" id="btnNewTour">New Tourney</button>
+</div>
+
+<div class="settingDivider"></div>
+
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actClearTablesTitle">Clear All Tables (New Night)</div>
+<div class="settingDesc" id="actClearTablesDesc">Removes all tables and active bets to start a fresh evening.</div>
+</div>
+<button class="btn btnActionWarn" id="btnClearTables">Clear Tables</button>
+</div>
+
+<div class="settingDivider"></div>
+
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actNewSeedTitle">Generate New 24-Knight Pool (Seed)</div>
+<div class="settingDesc" id="actNewSeedDesc">Replaces all 24 knights of this pub and resets their win records.</div>
+</div>
+<button class="btn btnActionDanger" id="btnNewSeed">New Seed</button>
 </div>
 </div>
 
 <div class="sectionTitle" id="secPubManageTitle">PUB PROFILE & SYSTEM</div>
 <div class="card formCard">
-<div class="fieldLabel" id="lblRenamePub">RENAME CURRENT PUB:</div>
-<div class="inputRow" style="margin-bottom:10px;">
+<div class="settingBlock">
+<div class="settingTitle" id="setRenamePubTitle">Pub Display Name</div>
+<div class="settingDesc" id="setRenamePubDesc">Shown in the TV header banner and at the top of the host controller.</div>
+<div class="inputRow wrapInputRow" style="margin-top:8px;">
 <input type="text" id="renamePubInput" placeholder="Pub name">
 <button class="btn btnGreen btnSmallAdd" id="btnSavePubName">SAVE NAME</button>
 </div>
-<div class="btnGrid grid2">
-<button class="btn btnDark" id="btnSwitchPub">SWITCH PUB</button>
-<button class="btn btnRed" id="btnDeletePub">DELETE THIS PUB</button>
 </div>
-<div class="btnGrid grid2" style="margin-bottom:0;">
-<a href="/" class="btn btnDark linkBtn" id="btnOpenTv">OPEN TV SCREEN</a>
-<button class="btn btnBlue" id="btnExportWork">EXPORT ALL DATA (JSON)</button>
+
+<div class="settingDivider"></div>
+
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actSwitchPubTitle">Switch Active Pub</div>
+<div class="settingDesc" id="actSwitchPubDesc">Return to the pub selection screen to open another venue.</div>
+</div>
+<button class="btn btnActionNeutral" id="btnSwitchPub">Switch Pub</button>
+</div>
+
+<div class="settingDivider"></div>
+
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actBackupTvTitle">Backup Data & TV View</div>
+<div class="settingDesc" id="actBackupTvDesc">Download a JSON backup of all pubs or open the TV screen.</div>
+</div>
+<div class="settingDualBtns">
+<button class="btn btnActionPrimary" id="btnExportWork">Export JSON</button>
+<a href="/" class="btn btnActionNeutral linkBtn" id="btnOpenTv">Open TV</a>
+</div>
+</div>
+
+<div class="settingDivider"></div>
+
+<div class="settingActionRow">
+<div class="settingActionInfo">
+<div class="settingTitle" id="actDeletePubTitle">Delete This Pub</div>
+<div class="settingDesc" id="actDeletePubDesc">Permanently deletes this pub and its 24 knights from the device.</div>
+</div>
+<button class="btn btnActionDanger" id="btnDeletePub">Delete Pub</button>
 </div>
 </div>
 </div>
 
 </div>
 <script src="/js/i18n.js"></script>
+<script src="/js/art.js"></script>
 <script src="host.js"></script>
 </body>
 </html>

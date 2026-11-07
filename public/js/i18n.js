@@ -267,7 +267,112 @@ btnSavePubName: 'SAVE NAME',
 btnDeletePub: 'DELETE THIS PUB',
 tapAgainConfirm:
 'TAP AGAIN TO CONFIRM!',
-tapConfirmShort: 'CONFIRM?'
+tapConfirmShort: 'CONFIRM?',
+stickyTableLbl:
+'ACTIVE TABLE / PLAYER:',
+whichKnightGridLbl:
+'TAP KNIGHT TO BET ON:',
+knightOutBadge: 'ELIMINATED',
+colorRed: 'Red',
+colorBlue: 'Blue',
+colorGreen: 'Green',
+colorPurple: 'Purple',
+colorSteel: 'Steel',
+colorCopper: 'Copper',
+errNoTables:
+'No tables yet! Add a table in the Pub Cashier below first.',
+errNoTableSel:
+'Select a table or player in the top bar first!',
+errWaitingScreen:
+'Betting is not open yet! Start the Knights Parade first.',
+errTourFinished:
+'Tournament is already finished! Start a new tournament.',
+errBoutDone:
+'This bout is already finished! Advance to the next match.',
+errLiveBetsOff:
+'Bout is underway and Live Bets are turned OFF in Pub Settings!',
+errPassRunning:
+'Wait for the current clash animation to pause before placing a live bet!',
+errNoKnightSel:
+'Tap a knight card above to select who to bet on!',
+errKnightElim:
+'This knight is already eliminated from the tournament!',
+errBadAmount:
+'Enter a bet amount of at least 1!',
+errLowBalance:
+'Not enough balance on this table! Have: ',
+errNeedAmt: ', bet: ',
+betPlacedOk: '✓ Bet accepted: ',
+setEconCardTitle:
+'ECONOMY & BETTING RULES',
+setGameModeTitle: 'Venue Economy Mode',
+setGameModeDesc:
+'Choose how guests place bets. In PUB mode, guests earn bottle caps for bar orders and exchange won caps for bar prizes. In CASH mode, tables bet from a cash deposit bank.',
+tabModePub: 'PUB (CAPS & PRIZES)',
+tabModeCash: 'CASH (DEPOSIT BANK)',
+setLiveBetsTitle:
+'Live In-Bout Betting',
+setLiveBetsDesc:
+'When enabled, combat pauses after each lance pass so the host can accept extra live bets with updated odds (accounting for cracked shields and fatigue).',
+switchOn: 'ON',
+switchOff: 'OFF',
+setParadeBonusTitle:
+'Parade Early-Bet Bonus',
+setParadeBonusDesc:
+'Rewards guests who place opening bets during the Knights Parade before the bracket begins.',
+setParade20Hint:
+'All bets placed during the Parade automatically receive +20% boosted payout odds.',
+setParadeGiftHint:
+'Winning bets placed during the Parade receive this bar gift in addition to their cap payout:',
+setOrderCardTitle:
+'BAR ORDER BONUS GRID',
+setOrderCardDesc:
+'Add menu items and how many caps they grant. These appear as 1-tap buttons in the Pub Cashier on the game screen.',
+setPrizeCardTitle:
+'PUB PRIZE SHOWCASE',
+setPrizeCardDesc:
+'Add bar rewards and their cost in caps. Shown on the bottom of the TV screen and in the Pub Cashier.',
+setTourCardTitle:
+'TOURNAMENT & EVENING ACTIONS',
+actRestartParadeTitle:
+'Restart Knights Parade',
+actRestartParadeDesc:
+'Rewinds the TV screen back to the opening Knights Parade of the current tournament. Tables and bets are kept.',
+btnActRestartParade: 'Restart Parade',
+actNewTourTitle:
+'New Tournament (8 of 24)',
+actNewTourDesc:
+'Draws 8 contenders from the pub’s 24-knight pool (champion & finalist stay to defend) and starts a new bracket. Table balances are kept.',
+btnActNewTour: 'New Tourney',
+actClearTablesTitle:
+'Clear All Tables (New Night)',
+actClearTablesDesc:
+'Removes all tables and active bets to start a fresh evening. Knights’ win history and bar items stay intact.',
+btnActClearTables: 'Clear Tables',
+actNewSeedTitle:
+'Generate New 24-Knight Pool (Seed)',
+actNewSeedDesc:
+'Replaces all 24 knights of this pub with a new random roster and resets all knight win/title records to zero.',
+btnActNewSeed: 'New Seed',
+setPubCardTitle:
+'PUB PROFILE & SYSTEM',
+setRenamePubTitle: 'Pub Display Name',
+setRenamePubDesc:
+'Shown in the TV header banner and at the top of the host controller.',
+actSwitchPubTitle: 'Switch Active Pub',
+actSwitchPubDesc:
+'Return to the pub selection screen to open another venue or create a new pub.',
+btnActSwitchPub: 'Switch Pub',
+actBackupTvTitle:
+'Backup Data & TV View',
+actBackupTvDesc:
+'Download a complete JSON backup of all pubs to your phone or open the TV screen in this browser.',
+btnActExport: 'Export JSON',
+btnActOpenTv: 'Open TV',
+actDeletePubTitle: 'Delete This Pub',
+actDeletePubDesc:
+'Permanently deletes this pub, its 24 knights, and all its settings from the device.',
+btnActDeletePub: 'Delete Pub'
 },
 
 uk: {
@@ -539,7 +644,114 @@ btnSavePubName: 'ЗБЕРЕГТИ',
 btnDeletePub: 'ВИДАЛИТИ ЦЕЙ ПАБ',
 tapAgainConfirm:
 'НАТИСНІТЬ ЩЕ РАЗ!',
-tapConfirmShort: 'ТОЧНО?'
+tapConfirmShort: 'ТОЧНО?',
+stickyTableLbl:
+'АКТИВНИЙ СТІЛ / ГРАВЕЦЬ:',
+whichKnightGridLbl:
+'НАТИСНІТЬ НА КАРТКУ ЛИЦАРЯ:',
+knightOutBadge: 'ВИБУВ',
+colorRed: 'Червоний',
+colorBlue: 'Синій',
+colorGreen: 'Зелений',
+colorPurple: 'Фіолетовий',
+colorSteel: 'Сталевий',
+colorCopper: 'Мідний',
+errNoTables:
+'Столи ще не додані! Спочатку додайте стіл у Касі пабу нижче.',
+errNoTableSel:
+'Спочатку оберіть стіл або гравця у верхній панелі!',
+errWaitingScreen:
+'Прийом ставок ще не відкрито! Спочатку запустіть Парад лицарів.',
+errTourFinished:
+'Турнір вже завершено! Запустіть новий турнір.',
+errBoutDone:
+'Цей поєдинок вже завершено! Перейдіть до наступного бою.',
+errLiveBetsOff:
+'Бій вже триває, а Live-ставки в бою вимкнені в налаштуваннях пабу!',
+errPassRunning:
+'Дочекайтеся паузи після кінної зшибки для прийому Live-ставки!',
+errNoKnightSel:
+'Натисніть на картку лицаря вище, щоб обрати на кого ставите!',
+errKnightElim:
+'Цей лицар вже вибув із поточного турніру!',
+errBadAmount:
+'Введіть суму ставки не менше 1!',
+errLowBalance:
+'Недостатньо коштів на рахунку столу! Є: ',
+errNeedAmt: ', ставка: ',
+betPlacedOk: '✓ Ставку прийнято: ',
+setEconCardTitle:
+'ЕКОНОМІКА ТА ПРАВИЛА СТАВОК',
+setGameModeTitle:
+'Режим економіки закладу',
+setGameModeDesc:
+'Визначає валюту гри. У режимі «ПАБ» гості отримують кришки за замовлення на барі та обмінюють виграні кришки на призи. У режимі «НА ГРОШІ» ставки йдуть із грошового банку столу.',
+tabModePub: 'ПАБ (КРИШКИ ТА ПРИЗИ)',
+tabModeCash: 'НА ГРОШІ (БАНК СТОЛУ)',
+setLiveBetsTitle:
+'Живі ставки між зшибками (Live)',
+setLiveBetsDesc:
+'Коли увімкнено, після кожної кінної зшибки бій стає на паузу, щоб ведучий міг прийняти додаткові ставки з оновленими коефіцієнтами.',
+switchOn: 'УВІМК',
+switchOff: 'ВИМК',
+setParadeBonusTitle:
+'Бонус за ставку під час параду',
+setParadeBonusDesc:
+'Заохочує гостей робити перші ставки під час відкриваючого параду лицарів до початку турнірної сітки.',
+setParade20Hint:
+'Усі ставки, прийняті під час параду, автоматично отримують +20% до коефіцієнта виплати.',
+setParadeGiftHint:
+'Переможні ставки, зроблені на параді, приносять столу цей подарунок від бару разом із виплатою:',
+setOrderCardTitle:
+'НАРАХУВАННЯ КРИШОК ЗА ЗАМОВЛЕННЯ',
+setOrderCardDesc:
+'Додайте позиції меню бару та скільки кришок дається за покупку. Вони з’являться як швидкі кнопки в Касі на екрані гри.',
+setPrizeCardTitle:
+'ВІТРИНА ПРИЗІВ ПАБУ',
+setPrizeCardDesc:
+'Вкажіть призи від закладу та їхню вартість у кришках. Вітрина відображається внизу екрана ТБ та у Касі ведучого.',
+setTourCardTitle:
+'КЕРУВАННЯ ТУРНІРОМ ТА ВЕЧОРОМ',
+actRestartParadeTitle:
+'Перезапустити парад лицарів',
+actRestartParadeDesc:
+'Повертає поточний турнір на початок параду на екрані ТБ. Баланси столів та прийняті ставки зберігаються.',
+btnActRestartParade: 'На парад',
+actNewTourTitle:
+'Новий турнір (8 із 24)',
+actNewTourDesc:
+'Відбирає нову вісімку бійців із 24 лицарів пабу (чемпіон та фіналіст залишаються захищати титул) і запускає нову сітку.',
+btnActNewTour: 'Новий турнір',
+actClearTablesTitle:
+'Очистити столи для нового вечора',
+actClearTablesDesc:
+'Видаляє всі столи та активні ставки перед початком нового вечора. Історія перемог лицарів і меню бару зберігаються.',
+btnActClearTables: 'Очистити столи',
+actNewSeedTitle:
+'Змінити пул із 24 лицарів (Сід)',
+actNewSeedDesc:
+'Генерує повністю новий склад із 24 лицарів для цього пабу та обнуляє їхню статистику перемог і титулів.',
+btnActNewSeed: 'Новий сід',
+setPubCardTitle:
+'ПРОФІЛЬ ПАБУ ТА СИСТЕМА',
+setRenamePubTitle: 'Назва пабу',
+setRenamePubDesc:
+'Відображається у верхній шапці на екрані ТБ та на пульті ведучого.',
+actSwitchPubTitle:
+'Змінити активний паб',
+actSwitchPubDesc:
+'Повернутися до списку закладів, щоб обрати інший паб або створити новий.',
+btnActSwitchPub: 'До списку пабів',
+actBackupTvTitle:
+'Резервна копія та екран ТБ',
+actBackupTvDesc:
+'Завантажити повний JSON-архів усіх пабів на телефон або відкрити екран ТБ у браузері.',
+btnActExport: 'Експорт JSON',
+btnActOpenTv: 'Екран ТБ',
+actDeletePubTitle: 'Видалити цей паб',
+actDeletePubDesc:
+'Безповоротно видаляє цей паб, його 24 лицарів та всі налаштування з пам’яті пристрою.',
+btnActDeletePub: 'Видалити паб'
 },
 
 ru: {
@@ -811,7 +1023,114 @@ btnSavePubName: 'СОХРАНИТЬ',
 btnDeletePub: 'УДАЛИТЬ ЭТОТ ПАБ',
 tapAgainConfirm:
 'НАЖМИТЕ ЕЩЁ РАЗ!',
-tapConfirmShort: 'ТОЧНО?'
+tapConfirmShort: 'ТОЧНО?',
+stickyTableLbl:
+'АКТИВНЫЙ СТОЛ / ИГРОК:',
+whichKnightGridLbl:
+'НАЖМИТЕ НА КАРТОЧКУ РЫЦАРЯ:',
+knightOutBadge: 'ВЫБЫЛ',
+colorRed: 'Красный',
+colorBlue: 'Синий',
+colorGreen: 'Зелёный',
+colorPurple: 'Фиолетовый',
+colorSteel: 'Стальной',
+colorCopper: 'Медный',
+errNoTables:
+'Столы ещё не добавлены! Сначала добавьте стол в Кассе паба ниже.',
+errNoTableSel:
+'Сначала выберите стол или игрока в верхней панели!',
+errWaitingScreen:
+'Приём ставок ещё не открыт! Сначала запустите Парад рыцарей.',
+errTourFinished:
+'Турнир уже завершён! Запустите новый турнир.',
+errBoutDone:
+'Этот поединок уже завершён! Перейдите к следующему бою.',
+errLiveBetsOff:
+'Бой уже идёт, а Live-ставки в бою отключены в настройках паба!',
+errPassRunning:
+'Дождитесь паузы после конной сшибки для приёма Live-ставки!',
+errNoKnightSel:
+'Нажмите на карточку рыцаря выше, чтобы выбрать, на кого ставите!',
+errKnightElim:
+'Этот рыцарь уже выбыл из текущего турнира!',
+errBadAmount:
+'Введите сумму ставки не меньше 1!',
+errLowBalance:
+'Недостаточно средств на счету стола! Доступно: ',
+errNeedAmt: ', ставка: ',
+betPlacedOk: '✓ Ставка принята: ',
+setEconCardTitle:
+'ЭКОНОМИКА И ПРАВИЛА СТАВОК',
+setGameModeTitle:
+'Режим экономики заведения',
+setGameModeDesc:
+'Определяет валюту игры. В режиме «ПАБ» гости получают крышки за заказы в баре и меняют выигранные крышки на призы. В режиме «НА ДЕНЬГИ» ставки идут из денежного банка стола.',
+tabModePub: 'ПАБ (КРЫШКИ И ПРИЗЫ)',
+tabModeCash: 'НА ДЕНЬГИ (БАНК СТОЛА)',
+setLiveBetsTitle:
+'Живые ставки между сшибками (Live)',
+setLiveBetsDesc:
+'Когда включено, после каждой конной сшибки бой встаёт на паузу, чтобы ведущий мог принять дополнительные ставки с обновлёнными коэффициентами.',
+switchOn: 'ВКЛ',
+switchOff: 'ВЫКЛ',
+setParadeBonusTitle:
+'Бонус за ставку во время парада',
+setParadeBonusDesc:
+'Поощряет гостей делать первые ставки во время открывающего парада рыцарей до перехода к турнирной сетке.',
+setParade20Hint:
+'Все ставки, принятые во время парада, автоматически получают +20% к коэффициенту выплаты.',
+setParadeGiftHint:
+'Выигравшие ставки, сделанные на параде, приносят столу этот подарок от бара помимо выплаты крышек:',
+setOrderCardTitle:
+'НАЧИСЛЕНИЕ КРЫШЕК ЗА ЗАКАЗЫ',
+setOrderCardDesc:
+'Добавьте позиции меню бара и сколько крышек даётся за их покупку. Они появятся как быстрые кнопки в Кассе на экране игры.',
+setPrizeCardTitle:
+'ВИТРИНА ПРИЗОВ ПАБА',
+setPrizeCardDesc:
+'Укажите призы от заведения и их стоимость в крышках. Витрина отображается внизу экрана ТВ и в Кассе ведущего.',
+setTourCardTitle:
+'УПРАВЛЕНИЕ ТУРНИРОМ И ВЕЧЕРОМ',
+actRestartParadeTitle:
+'Перезапустить парад рыцарей',
+actRestartParadeDesc:
+'Возвращает текущий турнир к началу парада на экране ТВ. Балансы столов и принятые ставки сохраняются.',
+btnActRestartParade: 'На парад',
+actNewTourTitle:
+'Новый турнир (8 из 24)',
+actNewTourDesc:
+'Отбирает новую восьмёрку бойцов из 24 рыцарей паба (чемпион и финалист остаются защищать титул) и запускает новую сетку.',
+btnActNewTour: 'Новый турнир',
+actClearTablesTitle:
+'Очистить столы для нового вечера',
+actClearTablesDesc:
+'Удаляет все столы и активные ставки перед началом нового вечера. История побед рыцарей и меню бара сохраняются.',
+btnActClearTables: 'Очистить столы',
+actNewSeedTitle:
+'Сменить пул из 24 рыцарей (Сид)',
+actNewSeedDesc:
+'Генерирует полностью новый состав из 24 рыцарей для этого паба и обнуляет их статистику побед и титулов.',
+btnActNewSeed: 'Новый сид',
+setPubCardTitle:
+'ПРОФИЛЬ ПАБА И СИСТЕМА',
+setRenamePubTitle: 'Название паба',
+setRenamePubDesc:
+'Отображается в верхней шапке на экране телевизора и на пульте ведущего.',
+actSwitchPubTitle:
+'Сменить активный паб',
+actSwitchPubDesc:
+'Вернуться к списку заведений, чтобы выбрать другой паб или создать новый.',
+btnActSwitchPub: 'К списку пабов',
+actBackupTvTitle:
+'Резервная копия и экран ТВ',
+actBackupTvDesc:
+'Скачать полный JSON-архив всех пабов на телефон или открыть экран ТВ в браузере.',
+btnActExport: 'Экспорт JSON',
+btnActOpenTv: 'Экран ТВ',
+actDeletePubTitle: 'Удалить этот паб',
+actDeletePubDesc:
+'Безвозвратно удаляет этот паб, его 24 рыцаря и все настройки из памяти устройства.',
+btnActDeletePub: 'Удалить паб'
 }
 };
 

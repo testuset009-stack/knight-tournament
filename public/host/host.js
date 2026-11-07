@@ -4,6 +4,7 @@
 'use strict';
 
 var betMode = 'MATCH';
+var selectedKnightId = '';
 var lastState = null;
 var lastLangSeen = '';
 var lastPubIdSeen = '';
@@ -15,6 +16,8 @@ var lastOrderSig = '';
 var lastPrizeSig = '';
 var lastBetsSig = '';
 var lastTablesSig = '';
+var lastKnightGridSig = '';
+var betMsgTimer = null;
 
 var tvNetBarUrl =
 document.getElementById('tvNetBarUrl');
@@ -67,6 +70,12 @@ var btnStartStep =
 document.getElementById('btnStartStep');
 var btnLiveToggle =
 document.getElementById('btnLiveToggle');
+var liveSwitchTxt =
+document.getElementById('liveSwitchTxt');
+var tabModePub =
+document.getElementById('tabModePub');
+var tabModeCash =
+document.getElementById('tabModeCash');
 var btnHostLang =
 document.getElementById('btnHostLang');
 var btnTvMute =
@@ -86,12 +95,16 @@ document.getElementById('tabBetOutright');
 
 var selectTable =
 document.getElementById('selectTable');
-var selectKnight =
-document.getElementById('selectKnight');
 var selectPrize =
 document.getElementById('selectPrize');
+var knightVisualGrid =
+document.getElementById(
+'knightVisualGrid'
+);
 var betAmountInput =
 document.getElementById('betAmountInput');
+var betStatusMsg =
+document.getElementById('betStatusMsg');
 var newTableName =
 document.getElementById('newTableName');
 
@@ -134,6 +147,10 @@ var tabParade20 =
 document.getElementById('tabParade20');
 var tabParadeGift =
 document.getElementById('tabParadeGift');
+var paradeModeHintText =
+document.getElementById(
+'paradeModeHintText'
+);
 var paradeGiftInputWrap =
 document.getElementById(
 'paradeGiftInputWrap'
@@ -162,6 +179,106 @@ function getLangBtnLabel(lang) {
 if (lang === 'uk') return 'МОВА: УКР';
 if (lang === 'ru') return 'ЯЗЫК: РУС';
 return 'LANG: EN';
+}
+
+// get armor color word by color index
+// helps host when guest names a color
+function getArmorColorWord(colorIdx) {
+var d = getDict();
+var idx = Math.abs(colorIdx || 0) % 6;
+var keys = [
+'colorRed',
+'colorBlue',
+'colorGreen',
+'colorPurple',
+'colorSteel',
+'colorCopper'
+];
+return d[keys[idx]] || '';
+}
+
+// show error or ok banner under bet button
+// hides automatically after a few seconds
+function showBetFeedback(text, isError) {
+if (!betStatusMsg) return;
+if (betMsgTimer) {
+clearTimeout(betMsgTimer);
+betMsgTimer = null;
+}
+if (!text) {
+betStatusMsg.className = 'cfgMsg hidden';
+betStatusMsg.textContent = '';
+return;
+}
+betStatusMsg.className = isError
+? 'cfgMsg errMsg'
+: 'cfgMsg okMsg';
+betStatusMsg.textContent = text;
+betMsgTimer = setTimeout(
+function () {
+betStatusMsg.className =
+'cfgMsg hidden';
+},
+isError ? 5000 : 3000
+);
+}
+
+// build readable message for bet error code
+// explains why bet is impossible right now
+function getBetErrorText(
+errCode,
+s,
+tableObj,
+amt
+) {
+var d = getDict();
+if (errCode === 'NO_TABLES') {
+return d.errNoTables;
+}
+if (errCode === 'NO_TABLE_SELECTED') {
+return d.errNoTableSel;
+}
+if (errCode === 'WAITING_SCREEN') {
+return d.errWaitingScreen;
+}
+if (errCode === 'TOUR_FINISHED') {
+return d.errTourFinished;
+}
+if (errCode === 'BOUT_DONE') {
+return d.errBoutDone;
+}
+if (errCode === 'LIVE_BETS_OFF') {
+return d.errLiveBetsOff;
+}
+if (errCode === 'PASS_IN_PROGRESS') {
+return d.errPassRunning;
+}
+if (errCode === 'NO_KNIGHT_SELECTED') {
+return d.errNoKnightSel;
+}
+if (errCode === 'KNIGHT_ELIMINATED') {
+return d.errKnightElim;
+}
+if (errCode === 'BAD_AMOUNT') {
+return d.errBadAmount;
+}
+if (errCode === 'LOW_BALANCE') {
+var haveStr = fmtMoney(
+tableObj ? tableObj.balance : 0,
+s ? s.gameMode : 'PUB'
+);
+var needStr = fmtMoney(
+amt || 0,
+s ? s.gameMode : 'PUB'
+);
+return (
+d.errLowBalance +
+haveStr +
+d.errNeedAmt +
+needStr
+);
+}
+return d.errNoKnightSel;
 }
 
 // check if button waits for second tap
@@ -218,8 +335,7 @@ btnEl.className =
 btnEl._origClass + ' confirmPending';
 btnEl.innerHTML = useShortText
 ? d.tapConfirmShort || 'CONFIRM?'
-: d.tapAgainConfirm ||
-'TAP AGAIN TO CONFIRM!';
+: d.tapConfirmShort || 'CONFIRM?';
 if (btnEl._confirmTimer) {
 clearTimeout(btnEl._confirmTimer);
 }
@@ -262,8 +378,6 @@ setTxt(
 d.btnCancelPub
 );
 setTxt('btnExportSelect', d.btnExportData);
-setTxt('btnExportWork', d.btnExportData);
-setTxt('btnSwitchPub', d.btnSwitchPub);
 setTxt(
 'btnOpenSettings',
 d.btnOpenSettings
@@ -274,10 +388,6 @@ setTxt('hostTvScreenLbl', d.tvScreenLbl);
 setTxt('hostModeLbl', d.modeLbl);
 setTxt('secCtrlTitle', d.ctrlSection);
 setTxt(
-'btnReplayParade',
-d.btnReplayParade
-);
-setTxt(
 'btnSwitchScreen',
 d.btnSwitchScreen
 );
@@ -285,8 +395,11 @@ setTxt('btnNewTourLive', d.btnNewTour);
 setTxt('secBetTitle', d.betSection);
 setTxt('tabBetMatch', d.tabMatch);
 setTxt('tabBetOutright', d.tabOutright);
-setTxt('lblWhoBets', d.whoBetsLbl);
-setTxt('lblWhichKnight', d.whichKnightLbl);
+setTxt('lblWhoBets', d.stickyTableLbl);
+setTxt(
+'lblWhichKnight',
+d.whichKnightGridLbl
+);
 setTxt('lblBetAmt', d.betAmtLbl);
 setTxt('btnPlaceBet', d.btnPlaceBet);
 setTxt('lblActiveBets', d.activeBetsLbl);
@@ -301,11 +414,53 @@ d.tablesManageLbl
 
 setTxt(
 'secModeLiveTitle',
-d.secModeLiveTitle
+d.setEconCardTitle
 );
 setTxt(
+'setGameModeTitle',
+d.setGameModeTitle
+);
+setTxt(
+'setGameModeDesc',
+d.setGameModeDesc
+);
+setTxt('tabModePub', d.tabModePub);
+setTxt('tabModeCash', d.tabModeCash);
+setTxt(
+'setLiveBetsTitle',
+d.setLiveBetsTitle
+);
+setTxt(
+'setLiveBetsDesc',
+d.setLiveBetsDesc
+);
+
+setTxt(
+'secParadeBonusTitle',
+d.paradeBonusSec
+);
+setTxt(
+'setParadeBonusTitle',
+d.setParadeBonusTitle
+);
+setTxt(
+'setParadeBonusDesc',
+d.setParadeBonusDesc
+);
+setTxt('tabParade20', d.tabBonus20);
+setTxt('tabParadeGift', d.tabBonusGift);
+setTxt(
+'btnSaveParadeBonus',
+d.btnSaveParadeBonus
+);
+
+setTxt(
 'secOrderGridTitle',
-d.orderGridTitle
+d.setOrderCardTitle
+);
+setTxt(
+'setOrderCardDesc',
+d.setOrderCardDesc
 );
 setTxt(
 'btnAddOrderItem',
@@ -317,39 +472,99 @@ d.btnAddCash
 );
 setTxt(
 'secPrizeGridTitle',
-d.prizeGridTitle
+d.setPrizeCardTitle
+);
+setTxt(
+'setPrizeCardDesc',
+d.setPrizeCardDesc
 );
 setTxt(
 'btnAddPrizeItem',
 d.btnAddPrizeItem
 );
-setTxt(
-'secParadeBonusTitle',
-d.paradeBonusSec
-);
-setTxt('tabParade20', d.tabBonus20);
-setTxt('tabParadeGift', d.tabBonusGift);
-setTxt(
-'btnSaveParadeBonus',
-d.btnSaveParadeBonus
-);
 
 setTxt(
 'secTourCtrlTitle',
-d.secTourCtrlTitle
+d.setTourCardTitle
 );
 setTxt(
-'secPubManageTitle',
-d.secPubManageTitle
+'actRestartParadeTitle',
+d.actRestartParadeTitle
 );
-setTxt('lblRenamePub', d.renamePubLbl);
+setTxt(
+'actRestartParadeDesc',
+d.actRestartParadeDesc
+);
+setTxt(
+'btnReplayParade',
+d.btnActRestartParade
+);
+setTxt(
+'actNewTourTitle',
+d.actNewTourTitle
+);
+setTxt('actNewTourDesc', d.actNewTourDesc);
+setTxt('btnNewTour', d.btnActNewTour);
+setTxt(
+'actClearTablesTitle',
+d.actClearTablesTitle
+);
+setTxt(
+'actClearTablesDesc',
+d.actClearTablesDesc
+);
+setTxt(
+'btnClearTables',
+d.btnActClearTables
+);
+setTxt(
+'actNewSeedTitle',
+d.actNewSeedTitle
+);
+setTxt('actNewSeedDesc', d.actNewSeedDesc);
+setTxt('btnNewSeed', d.btnActNewSeed);
+
+setTxt(
+'secPubManageTitle',
+d.setPubCardTitle
+);
+setTxt(
+'setRenamePubTitle',
+d.setRenamePubTitle
+);
+setTxt(
+'setRenamePubDesc',
+d.setRenamePubDesc
+);
 setTxt('btnSavePubName', d.btnSavePubName);
-setTxt('btnDeletePub', d.btnDeletePub);
-setTxt('btnClearTables', d.btnClearTables);
-setTxt('btnToggleMode', d.btnToggleMode);
-setTxt('btnNewTour', d.btnNewTour);
-setTxt('btnNewSeed', d.btnNewSeed);
-setTxt('btnOpenTv', d.btnOpenTv);
+setTxt(
+'actSwitchPubTitle',
+d.actSwitchPubTitle
+);
+setTxt(
+'actSwitchPubDesc',
+d.actSwitchPubDesc
+);
+setTxt('btnSwitchPub', d.btnActSwitchPub);
+setTxt(
+'actBackupTvTitle',
+d.actBackupTvTitle
+);
+setTxt(
+'actBackupTvDesc',
+d.actBackupTvDesc
+);
+setTxt('btnExportWork', d.btnActExport);
+setTxt('btnOpenTv', d.btnActOpenTv);
+setTxt(
+'actDeletePubTitle',
+d.actDeletePubTitle
+);
+setTxt(
+'actDeletePubDesc',
+d.actDeletePubDesc
+);
+setTxt('btnDeletePub', d.btnActDeletePub);
 
 if (newPubNameInput) {
 newPubNameInput.placeholder =
@@ -399,11 +614,13 @@ if (btnHostLang) {
 btnHostLang.innerHTML =
 getLangBtnLabel(lang);
 }
+syncParadeModeUi();
 lastPubsSig = '';
 lastOrderSig = '';
 lastPrizeSig = '';
 lastBetsSig = '';
 lastTablesSig = '';
+lastKnightGridSig = '';
 }
 
 // build custom touch selector around select
@@ -469,11 +686,7 @@ c.arrow.textContent = nextOpen ? '▴' : '▾';
 // close any open custom dropdown menus
 // called on outside tap or option pick
 function closeAllCustomSelects() {
-var list = [
-selectTable,
-selectKnight,
-selectPrize
-];
+var list = [selectTable, selectPrize];
 for (var i = 0; i < list.length; i++) {
 var el = list[i];
 if (el && el._custom && el._custom.isOpen) {
@@ -495,7 +708,6 @@ closeAllCustomSelects();
 );
 
 initCustomSelect(selectTable);
-initCustomSelect(selectKnight);
 initCustomSelect(selectPrize);
 
 // update select options without dom rebuild
@@ -662,22 +874,279 @@ return mode === 'CASH'
 }
 
 // update parade bonus mode tab buttons
-// toggles gift text input visibility
+// toggles gift text input and hint box
 function syncParadeModeUi() {
+var d = getDict();
 if (draftParadeMode === 'GIFT') {
 tabParade20.className =
 'btn btnSmallTab';
 tabParadeGift.className =
 'btn btnSmallTab activeTab';
 paradeGiftInputWrap.className =
-'inputRow';
+'inputRow wrapInputRow';
+if (paradeModeHintText) {
+paradeModeHintText.textContent =
+d.setParadeGiftHint || '';
+}
 } else {
 tabParade20.className =
 'btn btnSmallTab activeTab';
 tabParadeGift.className =
 'btn btnSmallTab';
 paradeGiftInputWrap.className =
-'inputRow hidden';
+'inputRow wrapInputRow hidden';
+if (paradeModeHintText) {
+paradeModeHintText.textContent =
+d.setParade20Hint || '';
+}
+}
+}
+
+// collect all 8 tournament knights in order
+// marks eliminated ones and syncs live odds
+function getEightTournamentKnights(s) {
+var aliveMap = {};
+var aliveList = s.aliveKnights || [];
+for (var a = 0; a < aliveList.length; a++) {
+aliveMap[aliveList[a].id] = aliveList[a];
+}
+var result = [];
+var seen = {};
+var matches = s.matches || [];
+for (var m = 0; m < 4; m++) {
+var qm = matches[m];
+if (!qm) continue;
+var pair = [qm.k1, qm.k2];
+for (var p = 0; p < 2; p++) {
+var kn = pair[p];
+if (kn && !seen[kn.id]) {
+seen[kn.id] = true;
+var liveK = aliveMap[kn.id];
+var copy = Object.assign({}, kn);
+if (liveK) {
+copy.outrightOdds = liveK.outrightOdds;
+copy.eliminated = false;
+} else {
+copy.eliminated = true;
+}
+result.push(copy);
+}
+}
+}
+if (result.length === 0) {
+for (var b = 0; b < aliveList.length; b++) {
+var ak = Object.assign({}, aliveList[b]);
+ak.eliminated = false;
+result.push(ak);
+}
+}
+return result;
+}
+
+// draw mini mounted knight on card canvas
+// shows horse coat shield helm and armor
+function drawMiniKnightCardCanvas(
+canvasEl,
+knight
+) {
+if (!canvasEl || !window.KnightArt) return;
+var ctx = canvasEl.getContext('2d');
+var w = canvasEl.width;
+var h = canvasEl.height;
+ctx.clearRect(0, 0, w, h);
+if (!knight) return;
+window.KnightArt.drawMountedKnight(
+ctx,
+54,
+67,
+0.42,
+knight,
+0,
+'idle'
+);
+}
+
+// render 2 bout knights or 8 tourney knights
+// lets host tap knight by armor color or name
+function renderKnightVisualGrid(
+s,
+m,
+isGiftParade
+) {
+if (!knightVisualGrid) return;
+var d = getDict();
+var isParade = s.tvScreen === 'PARADE';
+
+function fmtCardOdd(rawOdd) {
+var b = parseFloat(rawOdd) || 1.9;
+if (!isParade || isGiftParade) {
+return b.toFixed(1);
+}
+var boosted =
+Math.round(b * 1.2 * 10) / 10;
+return Math.max(b + 0.2, boosted).toFixed(1);
+}
+
+var cardsData = [];
+if (betMode === 'MATCH') {
+if (m && m.k1 && m.k2) {
+cardsData.push({
+slotLbl: '#1',
+knight: m.k1,
+oddsText:
+'x' + fmtCardOdd(m.odds1),
+eliminated: false
+});
+cardsData.push({
+slotLbl: '#2',
+knight: m.k2,
+oddsText:
+'x' + fmtCardOdd(m.odds2),
+eliminated: false
+});
+}
+} else {
+var eight = getEightTournamentKnights(s);
+for (var i = 0; i < eight.length; i++) {
+var tk = eight[i];
+cardsData.push({
+slotLbl: '#' + (i + 1),
+knight: tk,
+oddsText: tk.eliminated
+? d.knightOutBadge || 'OUT'
+: 'x' + fmtCardOdd(tk.outrightOdds),
+eliminated: Boolean(tk.eliminated)
+});
+}
+}
+
+// pick default valid knight when switching
+var validSel = false;
+for (var v = 0; v < cardsData.length; v++) {
+if (
+cardsData[v].knight.id ===
+selectedKnightId &&
+!cardsData[v].eliminated
+) {
+validSel = true;
+break;
+}
+}
+if (!validSel) {
+selectedKnightId = '';
+for (var f = 0; f < cardsData.length; f++) {
+if (!cardsData[f].eliminated) {
+selectedKnightId =
+cardsData[f].knight.id;
+break;
+}
+}
+}
+
+var sigParts = [
+betMode,
+selectedKnightId,
+isParade ? 'P' : 'N',
+isGiftParade ? 'G' : '20',
+s.lang || 'en'
+];
+for (var sIdx = 0; sIdx < cardsData.length; sIdx++) {
+var cd = cardsData[sIdx];
+sigParts.push(
+cd.knight.id +
+':' +
+cd.knight.name +
+':' +
+cd.oddsText +
+':' +
+(cd.eliminated ? '0' : '1')
+);
+}
+var sig = sigParts.join('|');
+if (sig === lastKnightGridSig) return;
+lastKnightGridSig = sig;
+
+knightVisualGrid.innerHTML = '';
+for (var c = 0; c < cardsData.length; c++) {
+(function (item) {
+var k = item.knight;
+var isSel =
+k.id === selectedKnightId &&
+!item.eliminated;
+var card = document.createElement('div');
+var cls = 'knightCardBtn';
+if (isSel) cls += ' selectedKnight';
+if (item.eliminated) {
+cls += ' eliminatedKnight';
+}
+card.className = cls;
+
+var armorHex = window.KnightArt
+? window.KnightArt.getArmor(k.colorIdx)
+.main
+: '#1D4ED8';
+var strip = document.createElement('div');
+strip.className = 'knightColorStrip';
+strip.style.background = armorHex;
+
+var numSpan =
+document.createElement('span');
+numSpan.textContent = item.slotLbl;
+var colSpan =
+document.createElement('span');
+colSpan.textContent = getArmorColorWord(
+k.colorIdx
+);
+strip.appendChild(numSpan);
+strip.appendChild(colSpan);
+
+var cvs =
+document.createElement('canvas');
+cvs.width = 124;
+cvs.height = 82;
+cvs.className = 'knightMiniCanvas';
+drawMiniKnightCardCanvas(cvs, k);
+
+var nameDiv =
+document.createElement('div');
+nameDiv.className = 'knightCardName';
+nameDiv.textContent = k.name;
+
+var oddsDiv =
+document.createElement('div');
+oddsDiv.className = 'knightCardOdds';
+var bonusSuffix = '';
+if (isParade && !item.eliminated) {
+bonusSuffix = isGiftParade
+? ' 🎁'
+: ' (+20%)';
+}
+oddsDiv.textContent =
+item.oddsText + bonusSuffix;
+
+card.appendChild(strip);
+card.appendChild(cvs);
+card.appendChild(nameDiv);
+card.appendChild(oddsDiv);
+
+card.onclick = function () {
+if (item.eliminated) {
+showBetFeedback(
+getBetErrorText(
+'KNIGHT_ELIMINATED',
+lastState
+),
+true
+);
+return;
+}
+selectedKnightId = k.id;
+showBetFeedback('', false);
+if (lastState) renderHost(lastState);
+};
+
+knightVisualGrid.appendChild(card);
+})(cardsData[c]);
 }
 }
 
@@ -1142,9 +1611,28 @@ btnTvMute.className = s.tvMuted
 : 'btn btnDark btnSoundSmall';
 }
 
-btnLiveToggle.innerHTML = s.allowLiveBets
-? d.liveBtnOn
-: d.liveBtnOff;
+// sync economy segmented switch in settings
+var isCash = s.gameMode === 'CASH';
+if (tabModePub && tabModeCash) {
+tabModePub.className = isCash
+? 'btn btnSmallTab'
+: 'btn btnSmallTab activeTab';
+tabModeCash.className = isCash
+? 'btn btnSmallTab activeTab'
+: 'btn btnSmallTab';
+}
+
+// sync live bets switch pill in settings
+if (btnLiveToggle) {
+btnLiveToggle.className = s.allowLiveBets
+? 'switchPill switchOn'
+: 'switchPill';
+}
+if (liveSwitchTxt) {
+liveSwitchTxt.textContent = s.allowLiveBets
+? d.switchOn || 'ON'
+: d.switchOff || 'OFF';
+}
 
 // show grey bracket button only for live bets
 // toggles between bracket and active arena
@@ -1309,7 +1797,6 @@ btnStartStep.innerHTML = d.btnStartBout;
 
 // update economy labels by mode
 // switches between pub caps and cash bank
-var isCash = s.gameMode === 'CASH';
 document.getElementById(
 'economySectionTitle'
 ).innerHTML = isCash
@@ -1325,8 +1812,8 @@ pubOrderQuickBtns.className = isCash
 ? 'quickOrderWrap hidden'
 : 'quickOrderWrap';
 cashDepositRow.className = isCash
-? 'inputRow'
-: 'inputRow hidden';
+? 'inputRow wrapInputRow'
+: 'inputRow wrapInputRow hidden';
 document.getElementById(
 'prizeRedeemBlock'
 ).style.display = isCash
@@ -1355,66 +1842,8 @@ fmtMoney(tb.balance, s.gameMode) +
 }
 syncSelect(selectTable, tItems);
 
-// format knight odd with optional +20% bonus
-// keeps base odd when gift mode is active
-function fmtHostOdd(rawOdd, isParade) {
-var b = parseFloat(rawOdd) || 1.9;
-if (!isParade || isGiftParade) {
-return b.toFixed(1);
-}
-var boosted =
-Math.round(b * 1.2 * 10) / 10;
-return Math.max(b + 0.2, boosted).toFixed(1);
-}
-
-// populate knights dropdown by bet mode
-// adds +20% or gift tag during parade
-var kItems = [];
-var isParade = s.tvScreen === 'PARADE';
-var bonusLabel = '';
-if (isParade) {
-bonusLabel = isGiftParade
-? d.bonusTagGift +
-s.paradeGiftText +
-']'
-: d.bonusTag20;
-}
-
-if (betMode === 'MATCH' && m && m.k1 && m.k2) {
-kItems.push({
-value: m.k1.id,
-text:
-m.k1.name +
-d.boutOpt +
-fmtHostOdd(m.odds1, isParade) +
-')' +
-bonusLabel
-});
-kItems.push({
-value: m.k2.id,
-text:
-m.k2.name +
-d.boutOpt +
-fmtHostOdd(m.odds2, isParade) +
-')' +
-bonusLabel
-});
-} else {
-var alive = s.aliveKnights || [];
-for (var j = 0; j < alive.length; j++) {
-var ak = alive[j];
-kItems.push({
-value: ak.id,
-text:
-ak.name +
-d.tourOpt +
-fmtHostOdd(ak.outrightOdds, isParade) +
-')' +
-bonusLabel
-});
-}
-}
-syncSelect(selectKnight, kItems);
+// render visual knight cards with portraits
+renderKnightVisualGrid(s, m, isGiftParade);
 
 // populate pub prizes dropdown
 // lists configured prizes and caps cost
@@ -1753,6 +2182,23 @@ sendAction({ type: 'delete_pub' });
 false
 );
 
+if (tabModePub) {
+tabModePub.onclick = function () {
+sendAction({
+type: 'toggle_mode',
+mode: 'PUB'
+});
+};
+}
+if (tabModeCash) {
+tabModeCash.onclick = function () {
+sendAction({
+type: 'toggle_mode',
+mode: 'CASH'
+});
+};
+}
+
 btnLiveToggle.onclick = function () {
 sendAction({ type: 'toggle_live_bets' });
 };
@@ -1763,6 +2209,7 @@ tabBetMatch.className =
 'btn btnSmallTab activeTab';
 tabBetOutright.className =
 'btn btnSmallTab';
+showBetFeedback('', false);
 renderHost(lastState);
 };
 
@@ -1771,6 +2218,7 @@ betMode = 'OUTRIGHT';
 tabBetOutright.className =
 'btn btnSmallTab activeTab';
 tabBetMatch.className = 'btn btnSmallTab';
+showBetFeedback('', false);
 renderHost(lastState);
 };
 
@@ -1782,28 +2230,181 @@ for (var c = 0; c < chips.length; c++) {
 chips[c].onclick = function () {
 betAmountInput.value =
 this.getAttribute('data-amt');
+showBetFeedback('', false);
 };
 }
 
+// validate bet and show clear error or ok
+// checks table balance phase and knight
 document.getElementById(
 'btnPlaceBet'
 ).onclick = function () {
+if (!lastState) return;
+var tables = lastState.tables || [];
+if (tables.length === 0) {
+showBetFeedback(
+getBetErrorText('NO_TABLES', lastState),
+true
+);
+return;
+}
 var tId = parseInt(selectTable.value, 10);
-var kId = selectKnight.value;
+var tableObj = null;
+for (var i = 0; i < tables.length; i++) {
+if (tables[i].id === tId) {
+tableObj = tables[i];
+break;
+}
+}
+if (!tableObj) {
+showBetFeedback(
+getBetErrorText(
+'NO_TABLE_SELECTED',
+lastState
+),
+true
+);
+return;
+}
+if (lastState.tvScreen === 'WAITING') {
+showBetFeedback(
+getBetErrorText(
+'WAITING_SCREEN',
+lastState
+),
+true
+);
+return;
+}
+if (
+lastState.tournamentStatus === 'FINISHED'
+) {
+showBetFeedback(
+getBetErrorText(
+'TOUR_FINISHED',
+lastState
+),
+true
+);
+return;
+}
+var curM =
+lastState.matches &&
+lastState.matches[
+lastState.currentMatchIndex
+];
+var cSt = lastState.combat || {};
+var waitSec =
+cSt.stepElapsedMs !== undefined
+? cSt.stepElapsedMs / 1000
+: 99;
+var revSec =
+cSt.mode === 'JOUST' ? 3.25 : 4.75;
+
+if (
+betMode === 'MATCH' &&
+(!curM ||
+curM.status === 'DONE' ||
+cSt.finished)
+) {
+showBetFeedback(
+getBetErrorText('BOUT_DONE', lastState),
+true
+);
+return;
+}
+if (
+lastState.tvScreen === 'COMBAT' &&
+!lastState.allowLiveBets
+) {
+showBetFeedback(
+getBetErrorText(
+'LIVE_BETS_OFF',
+lastState
+),
+true
+);
+return;
+}
+if (
+lastState.tvScreen === 'COMBAT' &&
+(!cSt.pausedForBets || waitSec < revSec)
+) {
+showBetFeedback(
+getBetErrorText(
+'PASS_IN_PROGRESS',
+lastState
+),
+true
+);
+return;
+}
+if (!selectedKnightId) {
+showBetFeedback(
+getBetErrorText(
+'NO_KNIGHT_SELECTED',
+lastState
+),
+true
+);
+return;
+}
 var amt = parseInt(
 betAmountInput.value,
 10
 );
-if (!tId || !kId || !amt || amt <= 0) {
+if (!amt || amt <= 0) {
+showBetFeedback(
+getBetErrorText('BAD_AMOUNT', lastState),
+true
+);
 return;
 }
-sendAction({
+if (tableObj.balance < amt) {
+showBetFeedback(
+getBetErrorText(
+'LOW_BALANCE',
+lastState,
+tableObj,
+amt
+),
+true
+);
+return;
+}
+
+sendAction(
+{
 type: 'place_bet',
 tableId: tId,
-knightId: kId,
+knightId: selectedKnightId,
 amount: amt,
 betType: betMode
-});
+},
+function (resp) {
+if (resp && resp.ok === false) {
+showBetFeedback(
+getBetErrorText(
+resp.errorCode,
+lastState,
+tableObj,
+amt
+),
+true
+);
+} else {
+var d = getDict();
+showBetFeedback(
+(d.betPlacedOk || '✓ ') +
+tableObj.name +
+' (' +
+fmtMoney(amt, lastState.gameMode) +
+')',
+false
+);
+}
+}
+);
 };
 
 // bind cash deposit and grid item buttons
@@ -1923,12 +2524,6 @@ type: 'add_table',
 name: name
 });
 newTableName.value = '';
-};
-
-document.getElementById(
-'btnToggleMode'
-).onclick = function () {
-sendAction({ type: 'toggle_mode' });
 };
 
 // hydrate host immediately from local backup

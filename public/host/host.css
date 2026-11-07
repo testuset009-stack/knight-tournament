@@ -7,15 +7,22 @@ padding: 0;
 -webkit-tap-highlight-color: transparent;
 }
 
+html,
 body {
 background: #090D16;
 color: #F1F5F9;
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-padding: 12px;
+overflow-x: hidden;
+max-width: 100%;
+}
+
+body {
+padding: 10px;
 }
 
 #hostApp {
 max-width: 520px;
+width: 100%;
 margin: 0 auto;
 padding-bottom: 36px;
 }
@@ -23,30 +30,36 @@ padding-bottom: 36px;
 /* top header bar on phone */
 /* we show title and tournament number */
 .topBar {
-height: 48px;
+min-height: 48px;
 background: #131C2E;
 border: 1px solid #1E293B;
 border-radius: 8px;
-padding: 9px 14px;
+padding: 8px 12px;
 margin-bottom: 12px;
 display: flex;
 align-items: center;
 justify-content: space-between;
+gap: 8px;
 }
 
 .barTitle {
-font-size: 17px;
+font-size: 16px;
 font-weight: 800;
 color: #38BDF8;
+min-width: 0;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
 }
 
 .barBadge {
 background: #1D4ED8;
 color: #FFFFFF;
-padding: 5px 10px;
+padding: 5px 8px;
 border-radius: 6px;
-font-size: 13px;
+font-size: 12px;
 font-weight: 800;
+white-space: nowrap;
 }
 
 /* status card and form containers */
@@ -57,6 +70,8 @@ border: 1px solid #1E293B;
 border-radius: 10px;
 padding: 12px;
 margin-bottom: 12px;
+max-width: 100%;
+overflow: hidden;
 }
 
 .statusRow {
@@ -65,6 +80,8 @@ justify-content: space-between;
 font-size: 13px;
 color: #94A3B8;
 margin-bottom: 8px;
+gap: 8px;
+flex-wrap: wrap;
 }
 
 .statusRow b {
@@ -72,13 +89,14 @@ color: #34D399;
 }
 
 .boutSummary {
-font-size: 16px;
+font-size: 15px;
 font-weight: 800;
 color: #F8FAFC;
 background: #090D16;
 padding: 10px;
 border-radius: 6px;
 border: 1px solid #1E293B;
+word-break: break-word;
 }
 
 .boutSubStatus {
@@ -91,7 +109,7 @@ margin-top: 6px;
 .sectionTitle {
 font-size: 12px;
 font-weight: 800;
-letter-spacing: 1px;
+letter-spacing: 0.8px;
 color: #94A3B8;
 margin: 14px 0 6px 2px;
 }
@@ -100,7 +118,117 @@ margin: 14px 0 6px 2px;
 font-size: 11px;
 font-weight: 800;
 color: #94A3B8;
-margin: 8px 0 4px 0;
+margin: 10px 0 5px 0;
+}
+
+/* sticky active table selector bar */
+/* stays pinned at top during scroll */
+.stickyTableBar {
+position: sticky;
+top: 0;
+z-index: 80;
+background: #0F172A;
+border: 2px solid #2563EB;
+border-radius: 10px;
+padding: 8px 10px;
+margin: 10px 0;
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.65);
+}
+
+.stickyTableHeader {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 4px;
+}
+
+.stickyTableLbl {
+font-size: 11px;
+font-weight: 900;
+letter-spacing: 0.6px;
+color: #38BDF8;
+}
+
+/* visual knight cards grid for betting */
+/* 2 cards for bout or 8 for tournament */
+.knightGrid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 8px;
+margin-bottom: 8px;
+width: 100%;
+}
+
+.knightCardBtn {
+background: #090D16;
+border: 2px solid #1E293B;
+border-radius: 10px;
+padding: 6px;
+display: flex;
+flex-direction: column;
+align-items: center;
+cursor: pointer;
+position: relative;
+min-width: 0;
+transition: border-color 0.12s, background 0.12s;
+}
+
+.knightCardBtn.selectedKnight {
+background: #172554;
+border-color: #38BDF8;
+box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+}
+
+.knightCardBtn.eliminatedKnight {
+opacity: 0.48;
+background: #090D16;
+}
+
+.knightColorStrip {
+width: 100%;
+height: 20px;
+border-radius: 5px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 7px;
+font-size: 11px;
+font-weight: 900;
+color: #FFFFFF;
+margin-bottom: 4px;
+}
+
+.knightMiniCanvas {
+width: 124px;
+height: 82px;
+display: block;
+}
+
+.knightCardName {
+font-size: 13px;
+font-weight: 800;
+color: #F8FAFC;
+text-align: center;
+line-height: 1.2;
+margin-top: 2px;
+word-break: break-word;
+}
+
+.knightCardOdds {
+margin-top: 4px;
+background: #064E3B;
+border: 1px solid #10B981;
+color: #A7F3D0;
+font-size: 12px;
+font-weight: 900;
+padding: 2px 8px;
+border-radius: 5px;
+}
+
+.knightCardBtn.eliminatedKnight .knightCardOdds {
+background: #334155;
+border-color: #475569;
+color: #CBD5E1;
 }
 
 /* button grids for touch controls */
@@ -109,23 +237,27 @@ margin: 8px 0 4px 0;
 display: flex;
 gap: 8px;
 margin-bottom: 8px;
+width: 100%;
 }
 
 .grid2 .btn,
 .grid3 .btn,
 .grid4 .btn {
 flex: 1;
+min-width: 0;
 }
 
 .btn {
-min-height: 48px;
+min-height: 46px;
 border: none;
 border-radius: 8px;
-font-size: 14px;
+font-size: 13px;
 font-weight: 800;
 color: #FFFFFF;
 cursor: pointer;
-padding: 0 10px;
+padding: 6px 10px;
+text-align: center;
+line-height: 1.2;
 }
 
 .btn:active {
@@ -158,13 +290,15 @@ background: #334155;
 
 .btnSmallTab {
 min-height: 42px;
-background: #1E293B;
+background: #090D16;
+border: 1px solid #334155;
 color: #94A3B8;
-font-size: 13px;
+font-size: 12px;
 }
 
 .btnSmallTab.activeTab {
 background: #2563EB;
+border-color: #38BDF8;
 color: #FFFFFF;
 }
 
@@ -193,17 +327,18 @@ margin-bottom: 4px;
 .customSelectWrap {
 position: relative;
 width: 100%;
-margin-bottom: 4px;
+min-width: 0;
+margin-bottom: 0;
 }
 
 .inputRow .customSelectWrap {
-flex: 1;
-margin-bottom: 0;
+flex: 1 1 160px;
+min-width: 0;
 }
 
 .customSelectBtn {
 width: 100%;
-min-height: 46px;
+min-height: 44px;
 background: #090D16;
 color: #F8FAFC;
 border: 1px solid #334155;
@@ -218,6 +353,13 @@ justify-content: space-between;
 cursor: pointer;
 }
 
+.customSelectBtn span:first-child {
+min-width: 0;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
 .customSelectBtn.open {
 border-color: #38BDF8;
 }
@@ -226,6 +368,7 @@ border-color: #38BDF8;
 color: #38BDF8;
 font-size: 12px;
 margin-left: 8px;
+flex-shrink: 0;
 }
 
 .customSelectMenu {
@@ -236,7 +379,7 @@ border-radius: 8px;
 margin-top: 4px;
 max-height: 240px;
 overflow-y: auto;
-z-index: 50;
+z-index: 95;
 }
 
 .customSelectMenu.open {
@@ -244,12 +387,13 @@ display: block;
 }
 
 .customSelectOpt {
-padding: 12px;
+padding: 11px 12px;
 font-size: 14px;
 font-weight: 700;
 color: #E2E8F0;
 border-bottom: 1px solid #1E293B;
 cursor: pointer;
+word-break: break-word;
 }
 
 .customSelectOpt:last-child {
@@ -261,34 +405,53 @@ background: #1D4ED8;
 color: #FFFFFF;
 }
 
+/* non-overflowing responsive input rows */
+/* prevents right overflow on small phones */
 .inputRow {
 display: flex;
 gap: 8px;
 margin-top: 4px;
+width: 100%;
+max-width: 100%;
+}
+
+.wrapInputRow {
+flex-wrap: wrap;
 }
 
 .inputRow input {
-flex: 1;
-height: 48px;
+flex: 1 1 120px;
+min-width: 0;
+max-width: 100%;
+height: 46px;
 background: #090D16;
 color: #FFFFFF;
 border: 1px solid #334155;
 border-radius: 8px;
-padding: 0 12px;
-font-size: 15px;
+padding: 0 10px;
+font-size: 14px;
 font-weight: 700;
 }
 
+.numShortInput {
+flex: 0 0 84px !important;
+width: 84px;
+}
+
 .btnAcceptBet {
-width: 165px;
+flex: 0 0 auto;
+min-width: 130px;
 }
 
 .btnRedeem {
-width: 145px;
+flex: 0 0 auto;
+min-width: 120px;
 }
 
 .btnSmallAdd {
-width: 110px;
+flex: 0 0 auto;
+min-width: 92px;
+padding: 0 12px;
 }
 
 .linkBtn {
@@ -310,6 +473,7 @@ width: 100%;
 min-height: 34px;
 padding: 4px 10px;
 font-size: 12px;
+flex-shrink: 0;
 }
 
 /* network url banner at top of host */
@@ -330,6 +494,7 @@ gap: 8px;
 font-size: 13px;
 color: #94A3B8;
 word-break: break-all;
+min-width: 0;
 }
 
 .netAddrVal {
@@ -362,6 +527,7 @@ gap: 10px;
 font-size: 16px;
 font-weight: 800;
 color: #F8FAFC;
+word-break: break-word;
 }
 
 .pubItemSub {
@@ -391,6 +557,7 @@ font-size: 13px;
 font-weight: 800;
 padding: 6px 10px;
 cursor: pointer;
+word-break: break-word;
 }
 
 .emptyHintBox {
@@ -405,6 +572,7 @@ display: flex;
 flex-direction: column;
 gap: 6px;
 margin-bottom: 8px;
+width: 100%;
 }
 
 .cfgRow {
@@ -419,6 +587,13 @@ gap: 8px;
 font-size: 13px;
 font-weight: 700;
 color: #E2E8F0;
+max-width: 100%;
+}
+
+.cfgRow span {
+min-width: 0;
+flex: 1;
+word-break: break-word;
 }
 
 .cfgRow b {
@@ -430,16 +605,13 @@ background: #BE123C;
 color: #FFFFFF;
 border: none;
 border-radius: 6px;
-width: 34px;
+min-width: 34px;
 height: 34px;
-font-size: 14px;
+padding: 0 8px;
+font-size: 13px;
 font-weight: 900;
 cursor: pointer;
 flex-shrink: 0;
-}
-
-.numShortInput {
-max-width: 92px;
 }
 
 .cfgMsg {
@@ -449,6 +621,7 @@ margin-top: 8px;
 padding: 8px 10px;
 border-radius: 6px;
 text-align: center;
+word-break: break-word;
 }
 
 .cfgMsg.errMsg {
@@ -469,6 +642,7 @@ color: #A7F3D0;
 display: flex;
 gap: 6px;
 align-items: center;
+flex-shrink: 0;
 }
 
 .statusSubRow {
@@ -482,6 +656,7 @@ margin-top: 8px;
 .statusSubRow .boutSubStatus {
 margin-top: 0;
 flex: 1;
+min-width: 0;
 }
 
 .btnSoundSmall {
@@ -496,7 +671,7 @@ flex-shrink: 0;
 .rowActions {
 display: flex;
 align-items: center;
-gap: 6px;
+gap: 5px;
 flex-shrink: 0;
 }
 
@@ -505,12 +680,12 @@ background: #1E293B;
 color: #F8FAFC;
 border: 1px solid #334155;
 border-radius: 6px;
-min-width: 40px;
-height: 36px;
+min-width: 38px;
+height: 34px;
 font-size: 13px;
 font-weight: 800;
 cursor: pointer;
-padding: 0 8px;
+padding: 0 7px;
 }
 
 .cfgRefundBtn {
@@ -518,12 +693,156 @@ background: #B45309;
 color: #FFFFFF;
 border: none;
 border-radius: 6px;
-height: 36px;
-padding: 0 10px;
+height: 34px;
+padding: 0 9px;
 font-size: 12px;
 font-weight: 800;
 cursor: pointer;
 flex-shrink: 0;
+}
+
+/* descriptive settings blocks and switches */
+/* explains every pub option to the host */
+.settingBlock {
+display: flex;
+flex-direction: column;
+}
+
+.settingTitle {
+font-size: 14px;
+font-weight: 800;
+color: #F8FAFC;
+margin-bottom: 3px;
+}
+
+.settingDesc {
+font-size: 12px;
+font-weight: 600;
+color: #94A3B8;
+line-height: 1.38;
+}
+
+.settingHintBox {
+background: #090D16;
+border: 1px solid #1E293B;
+border-radius: 7px;
+padding: 8px 10px;
+font-size: 12px;
+font-weight: 600;
+color: #CBD5E1;
+line-height: 1.35;
+margin-bottom: 6px;
+}
+
+.settingDivider {
+height: 1px;
+background: #1E293B;
+margin: 12px 0;
+}
+
+.switchSettingRow {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+}
+
+.switchSettingInfo {
+flex: 1;
+min-width: 0;
+}
+
+.switchPill {
+display: flex;
+align-items: center;
+gap: 6px;
+min-width: 84px;
+height: 40px;
+padding: 4px 10px 4px 6px;
+border-radius: 20px;
+border: 1px solid #475569;
+background: #1E293B;
+color: #94A3B8;
+font-size: 12px;
+font-weight: 900;
+cursor: pointer;
+flex-shrink: 0;
+transition: background 0.15s, border-color 0.15s;
+}
+
+.switchKnob {
+width: 24px;
+height: 24px;
+border-radius: 50%;
+background: #64748B;
+transition: transform 0.15s, background 0.15s;
+}
+
+.switchPill.switchOn {
+background: #065F46;
+border-color: #10B981;
+color: #FFFFFF;
+}
+
+.switchPill.switchOn .switchKnob {
+background: #34D399;
+}
+
+.settingActionRow {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+}
+
+.settingActionInfo {
+flex: 1;
+min-width: 0;
+}
+
+.settingDualBtns {
+display: flex;
+flex-direction: column;
+gap: 6px;
+flex-shrink: 0;
+}
+
+.btnActionPrimary,
+.btnActionNeutral,
+.btnActionWarn,
+.btnActionDanger {
+min-height: 40px;
+min-width: 112px;
+max-width: 138px;
+padding: 6px 10px;
+font-size: 12px;
+font-weight: 800;
+border-radius: 8px;
+flex-shrink: 0;
+}
+
+.btnActionPrimary {
+background: #1E3A8A;
+border: 1px solid #3B82F6;
+color: #F8FAFC;
+}
+
+.btnActionNeutral {
+background: #1E293B;
+border: 1px solid #475569;
+color: #E2E8F0;
+}
+
+.btnActionWarn {
+background: #7C2D12;
+border: 1px solid #F97316;
+color: #FFEDD5;
+}
+
+.btnActionDanger {
+background: #4C0519;
+border: 1px solid #F43F5E;
+color: #FFE4E6;
 }
 
 /* two-tap confirmation warning highlight */
@@ -533,4 +852,3 @@ background: #9F1239 !important;
 border: 2px solid #FDA4AF !important;
 color: #FFFFFF !important;
 }
-
