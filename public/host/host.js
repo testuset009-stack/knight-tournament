@@ -71,6 +71,10 @@ var btnHostLang =
 document.getElementById('btnHostLang');
 var btnTvMute =
 document.getElementById('btnTvMute');
+var btnSwitchScreen =
+document.getElementById(
+'btnSwitchScreen'
+);
 var btnNewTourLive =
 document.getElementById(
 'btnNewTourLive'
@@ -269,7 +273,6 @@ setTxt('btnBackToGame', d.btnBackToGame);
 setTxt('hostTvScreenLbl', d.tvScreenLbl);
 setTxt('hostModeLbl', d.modeLbl);
 setTxt('secCtrlTitle', d.ctrlSection);
-setTxt('btnNextMatch', d.btnNextMatch);
 setTxt(
 'btnReplayParade',
 d.btnReplayParade
@@ -1143,6 +1146,27 @@ btnLiveToggle.innerHTML = s.allowLiveBets
 ? d.liveBtnOn
 : d.liveBtnOff;
 
+// show grey bracket button only for live bets
+// toggles between bracket and active arena
+if (btnSwitchScreen) {
+if (s.allowLiveBets) {
+btnSwitchScreen.className =
+'btn btnDark btnFull';
+var canReturnArena =
+s.tvScreen === 'BRACKET' &&
+s.combat &&
+s.combat.active &&
+!s.combat.finished;
+btnSwitchScreen.innerHTML = canReturnArena
+? d.btnBackToArena ||
+d.btnSwitchScreen
+: d.btnSwitchScreen;
+} else {
+btnSwitchScreen.className =
+'btn btnDark btnFull hidden';
+}
+}
+
 // show new tourney on game view only at end
 // always accessible inside settings screen
 if (btnNewTourLive) {
@@ -1151,13 +1175,13 @@ s.tournamentStatus === 'FINISHED';
 if (isTourDone) {
 if (!isConfirmWaiting(btnNewTourLive)) {
 btnNewTourLive.className =
-'btn btnPurple';
+'btn btnPurple btnFull';
 btnNewTourLive.innerHTML = d.btnNewTour;
 }
 } else {
 clearTwoTapState(btnNewTourLive);
 btnNewTourLive.className =
-'btn btnPurple hidden';
+'btn btnPurple btnFull hidden';
 }
 }
 
@@ -1664,17 +1688,11 @@ sendAction({ type: 'toggle_tv_mute' });
 };
 }
 
-document.getElementById(
-'btnNextMatch'
-).onclick = function () {
-sendAction({ type: 'next_match' });
-};
-
-document.getElementById(
-'btnSwitchScreen'
-).onclick = function () {
+if (btnSwitchScreen) {
+btnSwitchScreen.onclick = function () {
 sendAction({ type: 'toggle_screen' });
 };
+}
 
 // bind two-tap confirmation on reset buttons
 // protects active pub tournament from mistap

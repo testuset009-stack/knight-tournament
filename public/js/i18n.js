@@ -118,7 +118,10 @@ btnNextMatch: 'NEXT MATCH',
 btnReplayParade: 'RESTART PARADE',
 liveBtnOn: 'LIVE BETS: ON',
 liveBtnOff: 'LIVE BETS: OFF',
-btnSwitchScreen: 'SWITCH TV SCREEN',
+btnSwitchScreen:
+'SHOW TOURNAMENT BRACKET',
+btnBackToArena:
+'RETURN TO COMBAT ARENA',
 betSection:
 'PLACE BETS (BOUT OR TOURNAMENT)',
 tabMatch: 'ON CURRENT BOUT',
@@ -385,7 +388,9 @@ btnReplayParade: 'ПАРАД З ПОЧАТКУ',
 liveBtnOn: 'LIVE В БОЮ: УВІМК',
 liveBtnOff: 'LIVE В БОЮ: ВИМК',
 btnSwitchScreen:
-'ПЕРЕмКНУТИ ЕКРАН ТБ',
+'ПОКАЗАТИ ТУРНІРНУ СІТКУ',
+btnBackToArena:
+'ПОВЕРНУТИСЯ ДО АРЕНИ БОЮ',
 betSection:
 'ПРИЙОМ СТАВОК (НА БІЙ АБО ТУРНІР)',
 tabMatch: 'НА ПОТОЧНИЙ БІЙ',
@@ -655,7 +660,9 @@ btnReplayParade: 'ПАРАД С НАЧАЛА',
 liveBtnOn: 'LIVE В БОЮ: ВКЛ',
 liveBtnOff: 'LIVE В БОЮ: ВЫКЛ',
 btnSwitchScreen:
-'ПЕРЕКЛЮЧИТЬ ЭКРАН ТВ',
+'ПОКАЗАТЬ ВСЮ СЕТКУ ТУРНИРА',
+btnBackToArena:
+'ВЕРНУТЬСЯ К АРЕНЕ БОЯ',
 betSection:
 'ПРИЁМ СТАВОК (НА БОЙ ИЛИ НА ТУРНИР)',
 tabMatch: 'НА ТЕКУЩИЙ БОЙ',

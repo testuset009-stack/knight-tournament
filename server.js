@@ -2403,22 +2403,15 @@ bonusActive: true
 };
 gameState.soundToPlay = 'horn';
 } else if (type === 'toggle_screen') {
-if (gameState.tvScreen === 'WAITING') {
-gameState.tvScreen = 'PARADE';
-gameState.statusKey = 'PARADE_START';
-gameState.statusText = getStatusStr(
-'PARADE_START',
-gameState.lang
-);
-gameState.lastParadeAt = Date.now();
-gameState.parade = {
-active: true,
-currentIndex: 0,
-subStep: 'RIDE_TO_RACK',
-finished: false,
-bonusActive: true
-};
-gameState.soundToPlay = 'horn';
+if (gameState.tvScreen === 'COMBAT') {
+gameState.tvScreen = 'BRACKET';
+} else if (
+gameState.tvScreen === 'BRACKET' &&
+gameState.combat &&
+gameState.combat.active &&
+!gameState.combat.finished
+) {
+gameState.tvScreen = 'COMBAT';
 } else if (gameState.tvScreen === 'PARADE') {
 gameState.tvScreen = 'BRACKET';
 gameState.statusKey = 'BETS_OPEN';
@@ -2426,8 +2419,6 @@ gameState.statusText = getStatusStr(
 'BETS_OPEN',
 gameState.lang
 );
-} else if (gameState.tvScreen === 'BRACKET') {
-gameState.tvScreen = 'COMBAT';
 } else {
 gameState.tvScreen = 'BRACKET';
 }
