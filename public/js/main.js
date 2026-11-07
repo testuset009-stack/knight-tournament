@@ -420,8 +420,10 @@ takenMap
 var drawQueue = [];
 for (var i = 0; i < list.length; i++) {
 var lk = list[i];
-var slotX = 520 + i * 180;
-var slotY = i % 2 === 0 ? 302 : 374;
+var isBottom = i % 2 !== 0;
+var slotX =
+520 + i * 180 - (isBottom ? 75 : 0);
+var slotY = isBottom ? 404 : 302;
 
 if (p.finished || i < curIdx) {
 drawQueue.push({
