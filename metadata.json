@@ -1,6 +1,6 @@
 {
-  "name": "Рыцарский Турнир (Android TV & Host)",
-  "description": "Вечерняя игра для Android TV и смартфона ведущего на базе StarterKit.",
+  "name": "Knight Tournament (Host Remote)",
+  "description": "Pub party betting and joust simulator for Android TV and mobile host remote.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
