@@ -33,6 +33,12 @@ var PORT = process.env.PORT || 3000;
 // we use express built in parser
 app.use(express.json());
 
+// redirect host.html for androidtvhost2
+// opens mobile host controller panel
+app.get('/host.html', function (req, res) {
+res.redirect('/host/');
+});
+
 // serve static files from public folder
 // we expose tv and host web apps
 app.use(
@@ -41,22 +47,51 @@ path.join(__dirname, 'public')
 )
 );
 
-var DATA_DIR =
-path.join(__dirname, 'data');
+// find writable folder on web or android apk
+// falls back to android files dir when needed
+function getWritableDir() {
+var localDir = path.join(__dirname, 'data');
+try {
+if (!fs.existsSync(localDir)) {
+fs.mkdirSync(localDir, {
+recursive: true
+});
+}
+fs.accessSync(localDir, fs.constants.W_OK);
+return localDir;
+} catch (e) {
+var apkDir = path.join(
+os.tmpdir(),
+'..',
+'files',
+'kt-data'
+);
+try {
+fs.mkdirSync(apkDir, {
+recursive: true
+});
+fs.accessSync(apkDir, fs.constants.W_OK);
+return apkDir;
+} catch (e2) {
+var tmpDir = path.join(
+os.tmpdir(),
+'kt-data'
+);
+try {
+fs.mkdirSync(tmpDir, {
+recursive: true
+});
+} catch (e3) {}
+return tmpDir;
+}
+}
+}
+
+var DATA_DIR = getWritableDir();
 var ROSTER_FILE =
 path.join(DATA_DIR, 'pub_roster.json');
 var STATE_FILE =
 path.join(DATA_DIR, 'state.json');
-
-// make data directory if missing
-// we check existence before writing
-if (!fs.existsSync(DATA_DIR)) {
-try {
-fs.mkdirSync(DATA_DIR);
-} catch (e) {
-console.log('dir err:', e);
-}
-}
 
 // 10 horse coats with 260 stat sum
 // each coat has its own joust trait
