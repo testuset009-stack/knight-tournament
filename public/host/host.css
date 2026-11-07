@@ -462,3 +462,75 @@ background: #064E3B;
 border: 1px solid #10B981;
 color: #A7F3D0;
 }
+
+/* header right group and sound toggle */
+/* keeps settings and sound easy to tap */
+.topBarRight {
+display: flex;
+gap: 6px;
+align-items: center;
+}
+
+.statusSubRow {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 8px;
+margin-top: 8px;
+}
+
+.statusSubRow .boutSubStatus {
+margin-top: 0;
+flex: 1;
+}
+
+.btnSoundSmall {
+min-height: 36px;
+padding: 4px 10px;
+font-size: 12px;
+flex-shrink: 0;
+}
+
+/* table balance step and refund buttons */
+/* compact touch targets inside list rows */
+.rowActions {
+display: flex;
+align-items: center;
+gap: 6px;
+flex-shrink: 0;
+}
+
+.cfgStepBtn {
+background: #1E293B;
+color: #F8FAFC;
+border: 1px solid #334155;
+border-radius: 6px;
+min-width: 40px;
+height: 36px;
+font-size: 13px;
+font-weight: 800;
+cursor: pointer;
+padding: 0 8px;
+}
+
+.cfgRefundBtn {
+background: #B45309;
+color: #FFFFFF;
+border: none;
+border-radius: 6px;
+height: 36px;
+padding: 0 10px;
+font-size: 12px;
+font-weight: 800;
+cursor: pointer;
+flex-shrink: 0;
+}
+
+/* two-tap confirmation warning highlight */
+/* pulses crimson border on first tap */
+.confirmPending {
+background: #9F1239 !important;
+border: 2px solid #FDA4AF !important;
+color: #FFFFFF !important;
+}
+

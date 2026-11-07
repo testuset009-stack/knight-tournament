@@ -9,9 +9,12 @@ var lastLangSeen = '';
 var lastPubIdSeen = '';
 var draftParadeMode = 'PERCENT_20';
 var isCreatingPub = false;
+var isSettingsOpen = false;
 var lastPubsSig = '';
 var lastOrderSig = '';
 var lastPrizeSig = '';
+var lastBetsSig = '';
+var lastTablesSig = '';
 
 var tvNetBarUrl =
 document.getElementById('tvNetBarUrl');
@@ -19,6 +22,10 @@ var pubSelectView =
 document.getElementById('pubSelectView');
 var pubWorkView =
 document.getElementById('pubWorkView');
+var pubSettingsView =
+document.getElementById(
+'pubSettingsView'
+);
 var savedPubsList =
 document.getElementById('savedPubsList');
 var addPubBtnWrap =
@@ -40,6 +47,10 @@ var newPubSeedInput =
 document.getElementById(
 'newPubSeedInput'
 );
+var renamePubInput =
+document.getElementById(
+'renamePubInput'
+);
 
 var tourBadge =
 document.getElementById('hostTourBadge');
@@ -58,6 +69,12 @@ var btnLiveToggle =
 document.getElementById('btnLiveToggle');
 var btnHostLang =
 document.getElementById('btnHostLang');
+var btnTvMute =
+document.getElementById('btnTvMute');
+var btnNewTourLive =
+document.getElementById(
+'btnNewTourLive'
+);
 var tabBetMatch =
 document.getElementById('tabBetMatch');
 var tabBetOutright =
@@ -73,6 +90,15 @@ var betAmountInput =
 document.getElementById('betAmountInput');
 var newTableName =
 document.getElementById('newTableName');
+
+var hostActiveBetsList =
+document.getElementById(
+'hostActiveBetsList'
+);
+var hostTablesList =
+document.getElementById(
+'hostTablesList'
+);
 
 var pubOrderQuickBtns =
 document.getElementById(
@@ -134,6 +160,75 @@ if (lang === 'ru') return 'ЯЗЫК: РУС';
 return 'LANG: EN';
 }
 
+// check if button waits for second tap
+// prevents poll from overwriting prompt
+function isConfirmWaiting(el) {
+return (
+el &&
+el._confirmUntil &&
+el._confirmUntil > Date.now()
+);
+}
+
+// reset button from two-tap warning state
+// restores normal label and class name
+function clearTwoTapState(el) {
+if (!el) return;
+if (el._confirmTimer) {
+clearTimeout(el._confirmTimer);
+el._confirmTimer = null;
+}
+el._confirmUntil = 0;
+if (el._origClass) {
+el.className = el._origClass;
+}
+if (el._origHtml !== undefined) {
+el.innerHTML = el._origHtml;
+}
+}
+
+// require two taps within 3.5s on danger
+// stops accidental resets during game
+function bindTwoTap(
+btnEl,
+onConfirm,
+useShortText
+) {
+if (!btnEl) return;
+btnEl.onclick = function (ev) {
+if (ev) ev.stopPropagation();
+var now = Date.now();
+if (
+btnEl._confirmUntil &&
+btnEl._confirmUntil > now
+) {
+clearTwoTapState(btnEl);
+onConfirm();
+return;
+}
+var d = getDict();
+btnEl._origClass = btnEl.className;
+btnEl._origHtml = btnEl.innerHTML;
+btnEl._confirmUntil = now + 3500;
+btnEl.className =
+btnEl._origClass + ' confirmPending';
+btnEl.innerHTML = useShortText
+? d.tapConfirmShort || 'CONFIRM?'
+: d.tapAgainConfirm ||
+'TAP AGAIN TO CONFIRM!';
+if (btnEl._confirmTimer) {
+clearTimeout(btnEl._confirmTimer);
+}
+btnEl._confirmTimer = setTimeout(
+function () {
+clearTwoTapState(btnEl);
+if (lastState) renderHost(lastState);
+},
+3500
+);
+};
+}
+
 // apply static host labels when lang changes
 // updates section headers and buttons
 function applyHostTranslations(lang) {
@@ -143,7 +238,12 @@ document.title = d.hostTitle || '';
 
 var setTxt = function (id, val) {
 var el = document.getElementById(id);
-if (el && val) el.innerHTML = val;
+if (!el || !val) return;
+if (isConfirmWaiting(el)) {
+el._origHtml = val;
+return;
+}
+el.innerHTML = val;
 };
 
 setTxt('tvNetBarLbl', d.tvNetBarLbl);
@@ -160,6 +260,11 @@ d.btnCancelPub
 setTxt('btnExportSelect', d.btnExportData);
 setTxt('btnExportWork', d.btnExportData);
 setTxt('btnSwitchPub', d.btnSwitchPub);
+setTxt(
+'btnOpenSettings',
+d.btnOpenSettings
+);
+setTxt('btnBackToGame', d.btnBackToGame);
 
 setTxt('hostTvScreenLbl', d.tvScreenLbl);
 setTxt('hostModeLbl', d.modeLbl);
@@ -173,6 +278,7 @@ setTxt(
 'btnSwitchScreen',
 d.btnSwitchScreen
 );
+setTxt('btnNewTourLive', d.btnNewTour);
 setTxt('secBetTitle', d.betSection);
 setTxt('tabBetMatch', d.tabMatch);
 setTxt('tabBetOutright', d.tabOutright);
@@ -180,11 +286,20 @@ setTxt('lblWhoBets', d.whoBetsLbl);
 setTxt('lblWhichKnight', d.whichKnightLbl);
 setTxt('lblBetAmt', d.betAmtLbl);
 setTxt('btnPlaceBet', d.btnPlaceBet);
+setTxt('lblActiveBets', d.activeBetsLbl);
 setTxt('lblRedeemPrize', d.redeemLbl);
 setTxt('btnClaimPrize', d.btnClaimPrize);
 setTxt('lblAddTable', d.addTableLbl);
 setTxt('btnAddTable', d.btnAddTable);
+setTxt(
+'lblTablesManage',
+d.tablesManageLbl
+);
 
+setTxt(
+'secModeLiveTitle',
+d.secModeLiveTitle
+);
 setTxt(
 'secOrderGridTitle',
 d.orderGridTitle
@@ -217,9 +332,17 @@ d.btnSaveParadeBonus
 );
 
 setTxt(
-'secSettingsTitle',
-d.settingsSection
+'secTourCtrlTitle',
+d.secTourCtrlTitle
 );
+setTxt(
+'secPubManageTitle',
+d.secPubManageTitle
+);
+setTxt('lblRenamePub', d.renamePubLbl);
+setTxt('btnSavePubName', d.btnSavePubName);
+setTxt('btnDeletePub', d.btnDeletePub);
+setTxt('btnClearTables', d.btnClearTables);
 setTxt('btnToggleMode', d.btnToggleMode);
 setTxt('btnNewTour', d.btnNewTour);
 setTxt('btnNewSeed', d.btnNewSeed);
@@ -227,6 +350,10 @@ setTxt('btnOpenTv', d.btnOpenTv);
 
 if (newPubNameInput) {
 newPubNameInput.placeholder =
+d.newPubNamePlaceholder || '';
+}
+if (renamePubInput) {
+renamePubInput.placeholder =
 d.newPubNamePlaceholder || '';
 }
 if (newPubSeedInput) {
@@ -272,6 +399,8 @@ getLangBtnLabel(lang);
 lastPubsSig = '';
 lastOrderSig = '';
 lastPrizeSig = '';
+lastBetsSig = '';
+lastTablesSig = '';
 }
 
 // build custom touch selector around select
@@ -554,7 +683,8 @@ paradeGiftInputWrap.className =
 function renderPubSelector(s) {
 var d = getDict();
 var pubs = s.pubsSummary || [];
-var sig = JSON.stringify(pubs) +
+var sig =
+JSON.stringify(pubs) +
 '_' +
 (s.lang || 'en');
 
@@ -599,6 +729,7 @@ openBtn.className = 'btn btnBlue';
 openBtn.textContent =
 d.btnSelectPub || 'OPEN';
 openBtn.onclick = function () {
+isSettingsOpen = false;
 sendAction({
 type: 'select_pub',
 pubId: pub.id
@@ -609,6 +740,169 @@ row.appendChild(info);
 row.appendChild(openBtn);
 savedPubsList.appendChild(row);
 })(pubs[i]);
+}
+}
+
+// render active bets list with refund button
+// lets host cancel mistaken bet immediately
+function renderActiveBetsSection(s) {
+if (!hostActiveBetsList) return;
+var d = getDict();
+var bets = s.activeBets || [];
+var sig =
+JSON.stringify(bets) +
+'_' +
+s.gameMode +
+'_' +
+(s.lang || 'en');
+if (sig === lastBetsSig) return;
+lastBetsSig = sig;
+
+hostActiveBetsList.innerHTML = '';
+if (bets.length === 0) {
+var empty = document.createElement('div');
+empty.className = 'emptyHintBox';
+empty.textContent = d.noActiveBets || '';
+hostActiveBetsList.appendChild(empty);
+return;
+}
+
+for (var i = 0; i < bets.length; i++) {
+(function (b, idx) {
+var row = document.createElement('div');
+row.className = 'cfgRow';
+var tag =
+b.betType === 'OUTRIGHT'
+? d.tagTour
+: d.tagBout;
+var gExtra = b.paradeGift
+? ' + ' + b.paradeGift
+: '';
+var txt = document.createElement('span');
+txt.innerHTML =
+'<b>' +
+b.tableName +
+'</b>: ' +
+fmtMoney(b.amount, s.gameMode) +
+' → ' +
+b.knightName +
+' (x' +
+Number(b.odds).toFixed(1) +
+') ' +
+tag +
+gExtra;
+
+var cancelBtn =
+document.createElement('button');
+cancelBtn.type = 'button';
+cancelBtn.className = 'cfgRefundBtn';
+cancelBtn.textContent =
+d.btnCancelBet || '✕ REFUND';
+cancelBtn.onclick = function () {
+sendAction({
+type: 'cancel_bet',
+betId: b.id || 0,
+betIndex: idx
+});
+};
+
+row.appendChild(txt);
+row.appendChild(cancelBtn);
+hostActiveBetsList.appendChild(row);
+})(bets[i], i);
+}
+}
+
+// render tables list with -1 +1 and delete
+// lets host fix balances or remove table
+function renderTablesManageSection(s) {
+if (!hostTablesList) return;
+var d = getDict();
+var tables = s.tables || [];
+var sig =
+JSON.stringify(tables) +
+'_' +
+s.gameMode +
+'_' +
+(s.lang || 'en');
+if (sig === lastTablesSig) return;
+lastTablesSig = sig;
+
+hostTablesList.innerHTML = '';
+if (tables.length === 0) {
+var empty = document.createElement('div');
+empty.className = 'emptyHintBox';
+empty.textContent = d.noTablesHost || '';
+hostTablesList.appendChild(empty);
+return;
+}
+
+for (var i = 0; i < tables.length; i++) {
+(function (tb) {
+var row = document.createElement('div');
+row.className = 'cfgRow';
+
+var txt = document.createElement('span');
+txt.innerHTML =
+tb.name +
+' — <b>' +
+fmtMoney(tb.balance, s.gameMode) +
+'</b>';
+
+var actWrap =
+document.createElement('div');
+actWrap.className = 'rowActions';
+
+var minusBtn =
+document.createElement('button');
+minusBtn.type = 'button';
+minusBtn.className = 'cfgStepBtn';
+minusBtn.textContent = '-1';
+minusBtn.onclick = function () {
+sendAction({
+type: 'adjust_table',
+tableId: tb.id,
+delta: -1
+});
+};
+
+var plusBtn =
+document.createElement('button');
+plusBtn.type = 'button';
+plusBtn.className = 'cfgStepBtn';
+plusBtn.textContent = '+1';
+plusBtn.onclick = function () {
+sendAction({
+type: 'adjust_table',
+tableId: tb.id,
+delta: 1
+});
+};
+
+var delBtn =
+document.createElement('button');
+delBtn.type = 'button';
+delBtn.className = 'cfgDelBtn';
+delBtn.textContent = '✕';
+bindTwoTap(
+delBtn,
+function () {
+sendAction({
+type: 'delete_table',
+tableId: tb.id
+});
+},
+true
+);
+
+actWrap.appendChild(minusBtn);
+actWrap.appendChild(plusBtn);
+actWrap.appendChild(delBtn);
+
+row.appendChild(txt);
+row.appendChild(actWrap);
+hostTablesList.appendChild(row);
+})(tables[i]);
 }
 }
 
@@ -733,6 +1027,23 @@ prizeGridList.appendChild(row);
 }
 }
 
+// switch between live game and pub settings
+// hides settings controls during live play
+function syncActivePubSubView() {
+if (!lastState || lastState.noPubSelected) {
+pubWorkView.className = 'hidden';
+pubSettingsView.className = 'hidden';
+return;
+}
+if (isSettingsOpen) {
+pubWorkView.className = 'hidden';
+pubSettingsView.className = '';
+} else {
+pubWorkView.className = '';
+pubSettingsView.className = 'hidden';
+}
+}
+
 // update host controller dom from state
 // switches between pub selector and work view
 function renderHost(s) {
@@ -757,15 +1068,17 @@ tvNetBarUrl.textContent = netUrl;
 }
 
 if (s.noPubSelected || !s.pubId) {
+isSettingsOpen = false;
 pubSelectView.className = '';
 pubWorkView.className = 'hidden';
+pubSettingsView.className = 'hidden';
 lastPubIdSeen = '';
 renderPubSelector(s);
 return;
 }
 
 pubSelectView.className = 'hidden';
-pubWorkView.className = '';
+syncActivePubSubView();
 
 if (s.pubId !== lastPubIdSeen) {
 lastPubIdSeen = s.pubId;
@@ -773,6 +1086,9 @@ draftParadeMode =
 s.paradeBonusType || 'PERCENT_20';
 paradeGiftInput.value =
 s.paradeGiftText || '';
+if (renamePubInput) {
+renamePubInput.value = s.pubName || '';
+}
 paradeBonusMsg.className =
 'cfgMsg hidden';
 syncParadeModeUi();
@@ -783,6 +1099,15 @@ document.getElementById('hostHeaderTitle');
 if (hdrEl) {
 hdrEl.textContent =
 s.pubName || d.hostHeader;
+}
+var setHdrEl = document.getElementById(
+'settingsHeaderTitle'
+);
+if (setHdrEl) {
+setHdrEl.textContent =
+(d.settingsScreenTitle || 'SETTINGS') +
+': ' +
+(s.pubName || '');
 }
 
 tourBadge.innerHTML =
@@ -805,9 +1130,36 @@ s.gameMode === 'CASH'
 ? d.modeCashShort
 : d.modePubShort;
 
+if (btnTvMute) {
+btnTvMute.innerHTML = s.tvMuted
+? d.tvSoundOff
+: d.tvSoundOn;
+btnTvMute.className = s.tvMuted
+? 'btn btnRed btnSoundSmall'
+: 'btn btnDark btnSoundSmall';
+}
+
 btnLiveToggle.innerHTML = s.allowLiveBets
 ? d.liveBtnOn
 : d.liveBtnOff;
+
+// show new tourney on game view only at end
+// always accessible inside settings screen
+if (btnNewTourLive) {
+var isTourDone =
+s.tournamentStatus === 'FINISHED';
+if (isTourDone) {
+if (!isConfirmWaiting(btnNewTourLive)) {
+btnNewTourLive.className =
+'btn btnPurple';
+btnNewTourLive.innerHTML = d.btnNewTour;
+}
+} else {
+clearTwoTapState(btnNewTourLive);
+btnNewTourLive.className =
+'btn btnPurple hidden';
+}
+}
 
 var isGiftParade =
 s.paradeBonusType === 'GIFT' &&
@@ -957,6 +1309,8 @@ document.getElementById(
 ? 'none'
 : 'block';
 
+renderActiveBetsSection(s);
+renderTablesManageSection(s);
 renderOrderGridSection(s);
 renderPrizeGridSection(s);
 
@@ -1193,6 +1547,34 @@ renderHost(s);
 xhr.send();
 }
 
+// bind navigation between game and settings
+// keeps dangerous controls off live screen
+var btnOpenSettings = document.getElementById(
+'btnOpenSettings'
+);
+if (btnOpenSettings) {
+btnOpenSettings.onclick = function () {
+isSettingsOpen = true;
+if (renamePubInput && lastState) {
+renamePubInput.value =
+lastState.pubName || '';
+}
+syncActivePubSubView();
+window.scrollTo(0, 0);
+};
+}
+
+var btnBackToGame = document.getElementById(
+'btnBackToGame'
+);
+if (btnBackToGame) {
+btnBackToGame.onclick = function () {
+isSettingsOpen = false;
+syncActivePubSubView();
+window.scrollTo(0, 0);
+};
+}
+
 // bind pub creation and selection controls
 // opens form when add pub button tapped
 document.getElementById(
@@ -1225,6 +1607,7 @@ return;
 }
 var pSeed = newPubSeedInput.value.trim();
 isCreatingPub = false;
+isSettingsOpen = false;
 addPubBtnWrap.className = 'card formCard';
 createPubFormCard.className =
 'card formCard hidden';
@@ -1240,7 +1623,20 @@ seed: pSeed
 document.getElementById(
 'btnSwitchPub'
 ).onclick = function () {
+isSettingsOpen = false;
 sendAction({ type: 'unselect_pub' });
+};
+
+document.getElementById(
+'btnSavePubName'
+).onclick = function () {
+if (!renamePubInput) return;
+var nextName = renamePubInput.value.trim();
+if (!nextName) return;
+sendAction({
+type: 'rename_pub',
+name: nextName
+});
 };
 
 document.getElementById(
@@ -1262,6 +1658,12 @@ sendAction({ type: 'cycle_lang' });
 };
 }
 
+if (btnTvMute) {
+btnTvMute.onclick = function () {
+sendAction({ type: 'toggle_tv_mute' });
+};
+}
+
 document.getElementById(
 'btnNextMatch'
 ).onclick = function () {
@@ -1274,13 +1676,64 @@ document.getElementById(
 sendAction({ type: 'toggle_screen' });
 };
 
-var btnReplayParade =
-document.getElementById('btnReplayParade');
-if (btnReplayParade) {
-btnReplayParade.onclick = function () {
+// bind two-tap confirmation on reset buttons
+// protects active pub tournament from mistap
+bindTwoTap(
+document.getElementById('btnReplayParade'),
+function () {
+isSettingsOpen = false;
 sendAction({ type: 'restart_parade' });
-};
-}
+},
+false
+);
+
+bindTwoTap(
+document.getElementById('btnNewTour'),
+function () {
+hostTriedRestore = true;
+isSettingsOpen = false;
+sendAction({ type: 'new_tournament' });
+},
+false
+);
+
+bindTwoTap(
+btnNewTourLive,
+function () {
+hostTriedRestore = true;
+sendAction({ type: 'new_tournament' });
+},
+false
+);
+
+bindTwoTap(
+document.getElementById('btnClearTables'),
+function () {
+hostTriedRestore = true;
+sendAction({ type: 'clear_tables' });
+},
+false
+);
+
+bindTwoTap(
+document.getElementById('btnNewSeed'),
+function () {
+hostTriedRestore = true;
+isSettingsOpen = false;
+sendAction({ type: 'new_pub_seed' });
+},
+false
+);
+
+bindTwoTap(
+document.getElementById('btnDeletePub'),
+function () {
+hostTriedRestore = true;
+isSettingsOpen = false;
+sendAction({ type: 'delete_pub' });
+},
+false
+);
 
 btnLiveToggle.onclick = function () {
 sendAction({ type: 'toggle_live_bets' });
@@ -1458,20 +1911,6 @@ document.getElementById(
 'btnToggleMode'
 ).onclick = function () {
 sendAction({ type: 'toggle_mode' });
-};
-
-document.getElementById(
-'btnNewTour'
-).onclick = function () {
-hostTriedRestore = true;
-sendAction({ type: 'new_tournament' });
-};
-
-document.getElementById(
-'btnNewSeed'
-).onclick = function () {
-hostTriedRestore = true;
-sendAction({ type: 'new_pub_seed' });
 };
 
 // hydrate host immediately from local backup

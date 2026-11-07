@@ -504,6 +504,7 @@ lang: l,
 pubSeed: seed,
 gameMode: 'PUB',
 allowLiveBets: true,
+tvMuted: false,
 paradeBonusType: 'PERCENT_20',
 paradeGiftText: '',
 tournamentNumber: 0,
@@ -1165,6 +1166,7 @@ gameMode:
 existingMode || pubData.gameMode || 'PUB',
 allowLiveBets:
 pubData.allowLiveBets !== false,
+tvMuted: Boolean(pubData.tvMuted),
 paradeBonusType:
 pubData.paradeBonusType || 'PERCENT_20',
 paradeGiftText:
@@ -1278,6 +1280,7 @@ saved.paradeBonusType =
 pubData.paradeBonusType || 'PERCENT_20';
 saved.paradeGiftText =
 pubData.paradeGiftText || '';
+saved.tvMuted = Boolean(pubData.tvMuted);
 saved.soundToPlay = null;
 saved.prizeBannerText = null;
 saved.lastParadeAt = Date.now();
@@ -2009,6 +2012,8 @@ gameState.paradeBonusType =
 pubData.paradeBonusType || 'PERCENT_20';
 gameState.paradeGiftText =
 pubData.paradeGiftText || '';
+gameState.tvMuted =
+Boolean(pubData.tvMuted);
 gameState.pubsSummary = getPubsSummary();
 gameState.rosterBackup = pubData.roster;
 var out = Object.assign({}, gameState);
@@ -2495,7 +2500,11 @@ calcParadeBonusOdd(lockedOdds)
 }
 
 tableObj.balance -= amt;
+var newBetId =
+Date.now() +
+Math.floor(Math.random() * 999);
 gameState.activeBets.unshift({
+id: newBetId,
 tableId: tableObj.id,
 tableName: tableObj.name,
 knightId: kId,
@@ -2509,12 +2518,140 @@ gameState.soundToPlay = 'bet';
 savePubData(pubData);
 updateAllOdds(gameState);
 }
+} else if (type === 'cancel_bet') {
+// remove mistaken bet and refund table
+// recalculates live odds after removal
+var cBetId = parseInt(body.betId, 10);
+var cBetIdx = parseInt(body.betIndex, 10);
+var curBets = gameState.activeBets || [];
+var keptBets = [];
+var refunded = false;
+for (
+var bi = 0;
+bi < curBets.length;
+bi++
+) {
+var bItem = curBets[bi];
+var matchById =
+cBetId && bItem.id === cBetId;
+var matchByIdx =
+!cBetId && bi === cBetIdx;
+if (
+!refunded &&
+(matchById || matchByIdx)
+) {
+refunded = true;
+creditTableById(
+bItem.tableId,
+bItem.amount
+);
+} else {
+keptBets.push(bItem);
+}
+}
+if (refunded) {
+gameState.activeBets = keptBets;
+savePubData(pubData);
+updateAllOdds(gameState);
+}
 } else if (type === 'add_credit') {
 var cTableId = parseInt(body.tableId, 10);
 var delta = parseInt(body.delta, 10) || 1;
 creditTableById(cTableId, delta);
 gameState.soundToPlay = 'bet';
 savePubData(pubData);
+} else if (type === 'adjust_table') {
+// adjust table balance up or down manually
+// clamps balance at zero caps or cash
+var adjId = parseInt(body.tableId, 10);
+var adjDelta =
+parseInt(body.delta, 10) || 0;
+if (adjId && adjDelta !== 0) {
+creditTableById(adjId, adjDelta);
+savePubData(pubData);
+}
+} else if (type === 'delete_table') {
+// remove one table and its active bets
+// keeps table list clean on host panel
+var delTId = parseInt(body.tableId, 10);
+if (delTId && pubData.tables) {
+var nextTables = [];
+for (
+var dti = 0;
+dti < pubData.tables.length;
+dti++
+) {
+if (pubData.tables[dti].id !== delTId) {
+nextTables.push(pubData.tables[dti]);
+}
+}
+pubData.tables = nextTables;
+gameState.tables = nextTables;
+var remTBets = [];
+var oldTBets = gameState.activeBets || [];
+for (
+var rbi = 0;
+rbi < oldTBets.length;
+rbi++
+) {
+if (oldTBets[rbi].tableId !== delTId) {
+remTBets.push(oldTBets[rbi]);
+}
+}
+gameState.activeBets = remTBets;
+savePubData(pubData);
+updateAllOdds(gameState);
+}
+} else if (type === 'clear_tables') {
+// clear all tables and bets for new night
+// keeps pub roster and prize settings
+pubData.tables = [];
+gameState.tables = [];
+gameState.activeBets = [];
+savePubData(pubData);
+updateAllOdds(gameState);
+} else if (type === 'toggle_tv_mute') {
+// mute or unmute tv sound from host phone
+// persists mute flag inside active pub
+pubData.tvMuted = !pubData.tvMuted;
+gameState.tvMuted = pubData.tvMuted;
+savePubData(pubData);
+} else if (type === 'rename_pub') {
+// update active pub name from settings
+// syncs header title and pub store list
+var nextName = String(
+body.name || ''
+).trim();
+if (nextName) {
+pubData.name = nextName;
+gameState.pubName = nextName;
+savePubData(pubData);
+}
+} else if (type === 'delete_pub') {
+// remove active pub from multi-pub store
+// returns host and tv to waiting screen
+var targetDelId =
+body.pubId || pubData.id;
+var remPubs = [];
+for (
+var dpi = 0;
+dpi < pubStore.pubs.length;
+dpi++
+) {
+if (pubStore.pubs[dpi].id !== targetDelId) {
+remPubs.push(pubStore.pubs[dpi]);
+}
+}
+pubStore.pubs = remPubs;
+pubStore.activePubId = null;
+pubData = null;
+gameState = buildWaitingState();
+savePubStore(pubStore);
+res.json({
+ok: true,
+state: buildClientResponse()
+});
+return;
 } else if (type === 'claim_prize') {
 var pTableId = parseInt(body.tableId, 10);
 var prizeId = parseInt(body.prizeId, 10);

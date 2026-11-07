@@ -237,7 +237,34 @@ waitingHostTitle:
 waitingHostSub:
 'Configure tables, bonuses and prizes, then press Start Knights Parade',
 btnStartParadeCmd:
-'START KNIGHTS PARADE'
+'START KNIGHTS PARADE',
+btnOpenSettings: '⚙ SETTINGS',
+btnBackToGame: '← BACK TO GAME',
+settingsScreenTitle: 'PUB SETTINGS',
+tvSoundOn: '🔊 TV SOUND: ON',
+tvSoundOff: '🔇 TV SOUND: OFF',
+activeBetsLbl:
+'ACTIVE BETS (✕ CANCEL & REFUND):',
+noActiveBets:
+'No active bets right now',
+btnCancelBet: '✕ REFUND',
+tablesManageLbl:
+'TABLES & BALANCE (-1 / +1 / ✕):',
+noTablesHost: 'No tables added yet',
+btnClearTables:
+'CLEAR ALL TABLES (NEW NIGHT)',
+secModeLiveTitle:
+'BETTING MODE & LIVE BETS',
+secTourCtrlTitle:
+'TOURNAMENT & EVENING RESET',
+secPubManageTitle:
+'PUB PROFILE & SYSTEM',
+renamePubLbl: 'RENAME CURRENT PUB:',
+btnSavePubName: 'SAVE NAME',
+btnDeletePub: 'DELETE THIS PUB',
+tapAgainConfirm:
+'TAP AGAIN TO CONFIRM!',
+tapConfirmShort: 'CONFIRM?'
 },
 
 uk: {
@@ -478,7 +505,36 @@ waitingHostTitle:
 waitingHostSub:
 'Налаштуйте столи, бонуси та призи і натисніть Почати парад лицарів',
 btnStartParadeCmd:
-'ПОЧАТИ ПАРАД ЛИЦАРІВ'
+'ПОЧАТИ ПАРАД ЛИЦАРІВ',
+btnOpenSettings: '⚙ НАЛАШТУВАННЯ',
+btnBackToGame: '← ДО ГРИ',
+settingsScreenTitle:
+'НАЛАШТУВАННЯ ПАБУ',
+tvSoundOn: '🔊 ЗВУК ТБ: УВІМК',
+tvSoundOff: '🔇 ЗВУК ТБ: ВИМК',
+activeBetsLbl:
+'АКТИВНІ СТАВКИ (✕ ПОВЕРНУТИ):',
+noActiveBets:
+'Активних ставок поки немає',
+btnCancelBet: '✕ ПОВЕРНУТИ',
+tablesManageLbl:
+'СТОЛИ ТА БАЛАНС (-1 / +1 / ✕):',
+noTablesHost: 'Столи ще не додані',
+btnClearTables:
+'ОЧИСТИТИ ВСІ СТОЛИ (НОВИЙ ВЕЧІР)',
+secModeLiveTitle:
+'РЕЖИМ СТАВОК ТА LIVE-СТАВКИ',
+secTourCtrlTitle:
+'КЕРУВАННЯ ТУРНІРОМ ТА ВЕЧОРОМ',
+secPubManageTitle:
+'ПРОФІЛЬ ПАБУ ТА СИСТЕМА',
+renamePubLbl:
+'ПЕРЕЙМЕНУВАТИ ПОТОЧНИЙ ПАБ:',
+btnSavePubName: 'ЗБЕРЕГТИ',
+btnDeletePub: 'ВИДАЛИТИ ЦЕЙ ПАБ',
+tapAgainConfirm:
+'НАТИСНІТЬ ЩЕ РАЗ!',
+tapConfirmShort: 'ТОЧНО?'
 },
 
 ru: {
@@ -719,7 +775,36 @@ waitingHostTitle:
 waitingHostSub:
 'Настройте столы, бонусы и призы, затем нажмите Начать парад рыцарей',
 btnStartParadeCmd:
-'НАЧАТЬ ПАРАД РЫЦАРЕЙ'
+'НАЧАТЬ ПАРАД РЫЦАРЕЙ',
+btnOpenSettings: '⚙ НАСТРОЙКИ',
+btnBackToGame: '← К ИГРЕ',
+settingsScreenTitle:
+'НАСТРОЙКИ ПАБА',
+tvSoundOn: '🔊 ЗВУК ТВ: ВКЛ',
+tvSoundOff: '🔇 ЗВУК ТВ: ВЫКЛ',
+activeBetsLbl:
+'АКТИВНЫЕ СТАВКИ (✕ ВЕРНУТЬ):',
+noActiveBets:
+'Активных ставок пока нет',
+btnCancelBet: '✕ ВЕРНУТЬ',
+tablesManageLbl:
+'СТОЛЫ И БАЛАНС (-1 / +1 / ✕):',
+noTablesHost: 'Столы ещё не добавлены',
+btnClearTables:
+'ОЧИСТИТЬ ВСЕ СТОЛЫ (НОВЫЙ ВЕЧЕР)',
+secModeLiveTitle:
+'РЕЖИМ СТАВОК И LIVE-СТАВКИ',
+secTourCtrlTitle:
+'УПРАВЛЕНИЕ ТУРНИРОМ И ВЕЧЕРОМ',
+secPubManageTitle:
+'ПРОФИЛЬ ПАБА И СИСТЕМА',
+renamePubLbl:
+'ПЕРЕИМЕНОВАТЬ ТЕКУЩИЙ ПАБ:',
+btnSavePubName: 'СОХРАНИТЬ',
+btnDeletePub: 'УДАЛИТЬ ЭТОТ ПАБ',
+tapAgainConfirm:
+'НАЖМИТЕ ЕЩЁ РАЗ!',
+tapConfirmShort: 'ТОЧНО?'
 }
 };
 

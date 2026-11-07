@@ -166,9 +166,12 @@ maxLife: 85
 }
 
 // play sound effect triggered by server
-// we map sound key to web audio synth
+// skips audio when tv mute is active
 function triggerSound(snd) {
 if (!window.GameSound || !snd) return;
+if (currentState && currentState.tvMuted) {
+return;
+}
 if (snd === 'horn') {
 window.GameSound.playHorn();
 } else if (snd === 'hoof') {

@@ -49,9 +49,9 @@
 <div id="pubWorkView" class="hidden">
 <div class="topBar">
 <div class="barTitle" id="hostHeaderTitle">HOST PANEL</div>
-<div style="display:flex;gap:6px;align-items:center;">
+<div class="topBarRight">
 <div class="barBadge" id="hostTourBadge">TOURNAMENT #1</div>
-<button class="btn btnDark btnLangSmall" id="btnSwitchPub">SWITCH PUB</button>
+<button class="btn btnBlue btnLangSmall" id="btnOpenSettings">⚙ SETTINGS</button>
 </div>
 </div>
 
@@ -61,7 +61,10 @@
 <span><span id="hostModeLbl">MODE: </span><b id="hostModeText">PUB</b></span>
 </div>
 <div class="boutSummary" id="hostBoutTitle">Match #1</div>
+<div class="statusSubRow">
 <div class="boutSubStatus" id="hostBoutSub">Betting open</div>
+<button class="btn btnDark btnSoundSmall" id="btnTvMute">🔊 TV SOUND: ON</button>
+</div>
 </div>
 
 <div class="sectionTitle" id="secCtrlTitle">SCREEN & BOUT CONTROLS</div>
@@ -70,11 +73,8 @@
 <button class="btn btnBlue" id="btnNextMatch">NEXT MATCH</button>
 </div>
 <div class="btnGrid grid2">
-<button class="btn btnCopper" id="btnReplayParade">RESTART PARADE</button>
-<button class="btn btnPurple" id="btnLiveToggle">LIVE BETS: ON</button>
-</div>
-<div class="btnGrid grid2">
 <button class="btn btnDark" id="btnSwitchScreen">SWITCH TV SCREEN</button>
+<button class="btn btnPurple hidden" id="btnNewTourLive">NEW TOURNEY (8 OF 24)</button>
 </div>
 
 <div class="sectionTitle" id="secBetTitle">PLACE BETS (BOUT OR TOURNAMENT)</div>
@@ -101,6 +101,9 @@
 <input type="number" id="betAmountInput" value="1" min="1" placeholder="Bet amount">
 <button class="btn btnGreen btnAcceptBet" id="btnPlaceBet">PLACE BET</button>
 </div>
+
+<div class="fieldLabel" id="lblActiveBets" style="margin-top:12px;">ACTIVE BETS (✕ CANCEL & REFUND):</div>
+<div id="hostActiveBetsList" class="cfgList"></div>
 </div>
 
 <div class="sectionTitle" id="economySectionTitle">PUB CASHIER: ORDERS & PRIZES</div>
@@ -125,6 +128,37 @@
 <input type="text" id="newTableName" placeholder="E.g. Table #1 or Bar Counter">
 <button class="btn btnDark btnSmallAdd" id="btnAddTable">+ TABLE</button>
 </div>
+
+<div class="fieldLabel" id="lblTablesManage" style="margin-top:12px;">TABLES & BALANCE (-1 / +1 / ✕):</div>
+<div id="hostTablesList" class="cfgList"></div>
+</div>
+</div>
+
+<div id="pubSettingsView" class="hidden">
+<div class="topBar">
+<div class="barTitle" id="settingsHeaderTitle">PUB SETTINGS</div>
+<button class="btn btnGreen btnLangSmall" id="btnBackToGame">← BACK TO GAME</button>
+</div>
+
+<div class="sectionTitle" id="secModeLiveTitle">BETTING MODE & LIVE BETS</div>
+<div class="card formCard">
+<div class="btnGrid grid2" style="margin-bottom:0;">
+<button class="btn btnBlue" id="btnToggleMode">MODE: PUB / CASH</button>
+<button class="btn btnPurple" id="btnLiveToggle">LIVE BETS: ON</button>
+</div>
+</div>
+
+<div class="sectionTitle" id="secParadeBonusTitle">PARADE BET BONUS MODE</div>
+<div class="card formCard">
+<div class="btnGrid grid2">
+<button class="btn btnSmallTab activeTab" id="tabParade20">+20% CAPS ODDS</button>
+<button class="btn btnSmallTab" id="tabParadeGift">GIFT ON WIN</button>
+</div>
+<div id="paradeGiftInputWrap" class="inputRow hidden">
+<input type="text" id="paradeGiftInput" placeholder="Enter gift name (required for Gift mode)">
+</div>
+<div id="paradeBonusMsg" class="cfgMsg hidden"></div>
+<button class="btn btnGreen btnFull" id="btnSaveParadeBonus" style="margin-top:8px;">SAVE PARADE BONUS</button>
 </div>
 
 <div class="sectionTitle" id="secOrderGridTitle">PURCHASE BONUS GRID (ITEM / CAPS)</div>
@@ -147,30 +181,33 @@
 </div>
 </div>
 
-<div class="sectionTitle" id="secParadeBonusTitle">PARADE BET BONUS MODE</div>
+<div class="sectionTitle" id="secTourCtrlTitle">TOURNAMENT & EVENING RESET</div>
 <div class="card formCard">
 <div class="btnGrid grid2">
-<button class="btn btnSmallTab activeTab" id="tabParade20">+20% CAPS ODDS</button>
-<button class="btn btnSmallTab" id="tabParadeGift">GIFT ON WIN</button>
-</div>
-<div id="paradeGiftInputWrap" class="inputRow hidden">
-<input type="text" id="paradeGiftInput" placeholder="Enter gift name (required for Gift mode)">
-</div>
-<div id="paradeBonusMsg" class="cfgMsg hidden"></div>
-<button class="btn btnGreen btnFull" id="btnSaveParadeBonus" style="margin-top:8px;">SAVE PARADE BONUS</button>
-</div>
-
-<div class="sectionTitle" id="secSettingsTitle">PUB & TOURNAMENT SETTINGS</div>
-<div class="btnGrid grid2">
-<button class="btn btnBlue" id="btnToggleMode">MODE: PUB / CASH</button>
+<button class="btn btnCopper" id="btnReplayParade">RESTART PARADE</button>
 <button class="btn btnPurple" id="btnNewTour">NEW TOURNEY (8 OF 24)</button>
 </div>
-<div class="btnGrid grid2">
+<div class="btnGrid grid2" style="margin-bottom:0;">
+<button class="btn btnCopper" id="btnClearTables">CLEAR ALL TABLES (NEW NIGHT)</button>
 <button class="btn btnRed" id="btnNewSeed">CHANGE PUB SEED</button>
-<a href="/" class="btn btnDark linkBtn" id="btnOpenTv">OPEN TV SCREEN</a>
+</div>
+</div>
+
+<div class="sectionTitle" id="secPubManageTitle">PUB PROFILE & SYSTEM</div>
+<div class="card formCard">
+<div class="fieldLabel" id="lblRenamePub">RENAME CURRENT PUB:</div>
+<div class="inputRow" style="margin-bottom:10px;">
+<input type="text" id="renamePubInput" placeholder="Pub name">
+<button class="btn btnGreen btnSmallAdd" id="btnSavePubName">SAVE NAME</button>
 </div>
 <div class="btnGrid grid2">
-<button class="btn btnBlue btnFull" id="btnExportWork">EXPORT ALL DATA (JSON)</button>
+<button class="btn btnDark" id="btnSwitchPub">SWITCH PUB</button>
+<button class="btn btnRed" id="btnDeletePub">DELETE THIS PUB</button>
+</div>
+<div class="btnGrid grid2" style="margin-bottom:0;">
+<a href="/" class="btn btnDark linkBtn" id="btnOpenTv">OPEN TV SCREEN</a>
+<button class="btn btnBlue" id="btnExportWork">EXPORT ALL DATA (JSON)</button>
+</div>
 </div>
 </div>
 
