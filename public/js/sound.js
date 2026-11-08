@@ -5,6 +5,7 @@
 
 var ctx = null;
 var muted = false;
+var unlocked = false;
 
 // make audio context safely
 // we check webkit prefix on old webview
@@ -14,18 +15,83 @@ var AudioClass =
 window.AudioContext ||
 window.webkitAudioContext;
 if (AudioClass) {
+try {
 ctx = new AudioClass();
+} catch (e) {
+ctx = null;
+}
 }
 }
 if (ctx && ctx.state === 'suspended') {
 try {
-ctx.resume();
+var p = ctx.resume();
+if (p && p.then) {
+p.then(function () {
+unlocked = true;
+}).catch(function () {});
+}
 } catch (e) {
 // skip resume error
 }
 }
+if (ctx && ctx.state === 'running') {
+unlocked = true;
+}
 return ctx;
 }
+
+// unlock audio on smart tv and safari
+// plays 1-frame silent buffer on tap
+function unlock() {
+var c = getCtx();
+if (!c) return false;
+try {
+if (c.state === 'suspended') {
+var pr = c.resume();
+if (pr && pr.then) {
+pr.then(function () {
+unlocked = true;
+}).catch(function () {});
+}
+}
+var buf = c.createBuffer(1, 1, 22050);
+var src = c.createBufferSource();
+src.buffer = buf;
+src.connect(c.destination);
+if (src.start) {
+src.start(0);
+} else if (src.noteOn) {
+src.noteOn(0);
+}
+unlocked = true;
+} catch (e) {
+// skip buffer error
+}
+return unlocked;
+}
+
+// unlock audio on first remote or touch
+// covers pointer touch and tv d-pad keys
+function bindAutoUnlock() {
+var events = [
+'pointerdown',
+'touchstart',
+'mousedown',
+'keydown'
+];
+var handler = function () {
+unlock();
+};
+for (var i = 0; i < events.length; i++) {
+document.addEventListener(
+events[i],
+handler,
+{ passive: true }
+);
+}
+}
+
+bindAutoUnlock();
 
 // play single synthetic beep tone
 // we use oscillator and gain envelope
@@ -161,10 +227,18 @@ muted = !muted;
 return muted;
 }
 
+// set explicit mute boolean
+// syncs local audio with server tvMuted
+function setMuted(val) {
+muted = Boolean(val);
+return muted;
+}
+
 // attach sound player to window object
 // we expose methods for main tv script
 global.GameSound = {
 init: getCtx,
+unlock: unlock,
 playTone: playTone,
 playHorn: playHorn,
 playHoof: playHoof,
@@ -175,8 +249,15 @@ playBet: playBet,
 playFanfare: playFanfare,
 playPrize: playPrize,
 toggleMute: toggleMute,
+setMuted: setMuted,
 isMuted: function () {
 return muted;
+},
+isUnlocked: function () {
+return Boolean(
+unlocked ||
+(ctx && ctx.state === 'running')
+);
 }
 };
 })(window);

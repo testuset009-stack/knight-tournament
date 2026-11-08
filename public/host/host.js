@@ -18,11 +18,14 @@ var lastBetsSig = '';
 var lastTablesSig = '';
 var lastKnightGridSig = '';
 var betMsgTimer = null;
+var tableCustomInputs = {};
 
 var tvNetBarUrl =
 document.getElementById('tvNetBarUrl');
 var pubSelectView =
 document.getElementById('pubSelectView');
+var pinLockView =
+document.getElementById('pinLockView');
 var pubWorkView =
 document.getElementById('pubWorkView');
 var pubSettingsView =
@@ -124,11 +127,21 @@ var hostTablesList =
 document.getElementById(
 'hostTablesList'
 );
+var settingsTablesList =
+document.getElementById(
+'settingsTablesList'
+);
+var setNewTableName =
+document.getElementById(
+'setNewTableName'
+);
 
 var pubOrderQuickBtns =
 document.getElementById(
 'pubOrderQuickBtns'
 );
+var customCapsLbl =
+document.getElementById('customCapsLbl');
 var cashDepositRow =
 document.getElementById('cashDepositRow');
 var cashDepositInput =
@@ -169,6 +182,46 @@ document.getElementById(
 );
 var paradeBonusMsg =
 document.getElementById('paradeBonusMsg');
+
+var btnPinToggle =
+document.getElementById('btnPinToggle');
+var pinSwitchTxt =
+document.getElementById('pinSwitchTxt');
+var pinCodeInput =
+document.getElementById('pinCodeInput');
+var pinConfigMsg =
+document.getElementById('pinConfigMsg');
+var pinUnlockInput =
+document.getElementById('pinUnlockInput');
+var pinUnlockMsg =
+document.getElementById('pinUnlockMsg');
+
+// check if current browser unlocked pub pin
+// stores unlock flag in session storage
+function isPubPinUnlocked(pubId) {
+if (!pubId) return true;
+try {
+return (
+window.sessionStorage.getItem(
+'kt_pin_ok_' + pubId
+) === '1'
+);
+} catch (e) {
+return false;
+}
+}
+
+// mark pub pin as unlocked on this device
+// avoids re-asking pin during active evening
+function markPubPinUnlocked(pubId) {
+if (!pubId) return;
+try {
+window.sessionStorage.setItem(
+'kt_pin_ok_' + pubId,
+'1'
+);
+} catch (e) {}
+}
 
 // get dictionary for active state language
 // defaults to english when lang is unset
@@ -476,7 +529,11 @@ d.btnAddOrderItem
 );
 setTxt(
 'btnAddCashDeposit',
-d.btnAddCash
+d.btnAddCapsCustom
+);
+setTxt(
+'btnSubCashDeposit',
+d.btnSubCapsCustom
 );
 setTxt(
 'secPrizeGridTitle',
@@ -490,6 +547,15 @@ setTxt(
 'btnAddPrizeItem',
 d.btnAddPrizeItem
 );
+setTxt(
+'secSetTablesTitle',
+d.secSetTablesTitle
+);
+setTxt(
+'setTablesCardDesc',
+d.setTablesCardDesc
+);
+setTxt('btnSetAddTable', d.btnAddTable);
 
 setTxt(
 'secTourCtrlTitle',
@@ -535,6 +601,16 @@ setTxt('btnNewSeed', d.btnActNewSeed);
 setTxt(
 'secPubManageTitle',
 d.setPubCardTitle
+);
+setTxt('setPinTitle', d.setPinTitle);
+setTxt('setPinDesc', d.setPinDesc);
+setTxt('btnSavePin', d.btnSavePin);
+setTxt('pinLockTitle', d.pinLockTitle);
+setTxt('pinLockSub', d.pinLockSub);
+setTxt('btnUnlockPin', d.btnUnlockPin);
+setTxt(
+'btnPinSwitchPub',
+'← ' + (d.btnActSwitchPub || 'Switch Pub')
 );
 setTxt(
 'setRenamePubTitle',
@@ -594,6 +670,13 @@ if (newTableName && d.newTablePlaceholder) {
 newTableName.placeholder =
 d.newTablePlaceholder;
 }
+if (
+setNewTableName &&
+d.newTablePlaceholder
+) {
+setNewTableName.placeholder =
+d.newTablePlaceholder;
+}
 if (orderItemInput) {
 orderItemInput.placeholder =
 d.orderItemPlaceholder || '';
@@ -604,7 +687,7 @@ d.orderCapsPlaceholder || '';
 }
 if (cashDepositInput) {
 cashDepositInput.placeholder =
-d.cashTopupPlaceholder || '';
+d.capsInputPlaceholder || '';
 }
 if (prizeCostInput) {
 prizeCostInput.placeholder =
@@ -617,6 +700,14 @@ d.prizeTitlePlaceholder || '';
 if (paradeGiftInput) {
 paradeGiftInput.placeholder =
 d.giftNamePlaceholder || '';
+}
+if (pinCodeInput) {
+pinCodeInput.placeholder =
+d.pinInputPlaceholder || '';
+}
+if (pinUnlockInput) {
+pinUnlockInput.placeholder =
+d.pinInputPlaceholder || '';
 }
 if (btnHostLang) {
 btnHostLang.innerHTML =
@@ -975,7 +1066,7 @@ knight,
 }
 
 // render 2 bout knights or 8 tourney knights
-// lets host tap knight by armor color or name
+// parade bonus applies only to outright
 function renderKnightVisualGrid(
 s,
 m,
@@ -983,11 +1074,13 @@ isGiftParade
 ) {
 if (!knightVisualGrid) return;
 var d = getDict();
-var isParade = s.tvScreen === 'PARADE';
+var isParadeBonus =
+s.tvScreen === 'PARADE' &&
+betMode === 'OUTRIGHT';
 
 function fmtCardOdd(rawOdd) {
 var b = parseFloat(rawOdd) || 1.9;
-if (!isParade || isGiftParade) {
+if (!isParadeBonus || isGiftParade) {
 return b.toFixed(1);
 }
 var boosted =
@@ -1054,7 +1147,7 @@ break;
 var sigParts = [
 betMode,
 selectedKnightId,
-isParade ? 'P' : 'N',
+isParadeBonus ? 'P' : 'N',
 isGiftParade ? 'G' : '20',
 s.lang || 'en'
 ];
@@ -1124,7 +1217,7 @@ var oddsDiv =
 document.createElement('div');
 oddsDiv.className = 'knightCardOdds';
 var bonusSuffix = '';
-if (isParade && !item.eliminated) {
+if (isParadeBonus && !item.eliminated) {
 bonusSuffix = isGiftParade
 ? ' 🎁'
 : ' (+20%)';
@@ -1293,34 +1386,15 @@ hostActiveBetsList.appendChild(row);
 }
 }
 
-// render tables list with -1 +1 and delete
-// lets host fix balances or remove table
-function renderTablesManageSection(s) {
-if (!hostTablesList) return;
-var d = getDict();
-var tables = s.tables || [];
-var sig =
-JSON.stringify(tables) +
-'_' +
-s.gameMode +
-'_' +
-(s.lang || 'en');
-if (sig === lastTablesSig) return;
-lastTablesSig = sig;
-
-hostTablesList.innerHTML = '';
-if (tables.length === 0) {
-var empty = document.createElement('div');
-empty.className = 'emptyHintBox';
-empty.textContent = d.noTablesHost || '';
-hostTablesList.appendChild(empty);
-return;
-}
-
-for (var i = 0; i < tables.length; i++) {
-(function (tb) {
+// build single table row with custom input
+// lets host add or deduct any caps amount
+function buildTableControlRow(
+tb,
+s,
+keyPrefix
+) {
 var row = document.createElement('div');
-row.className = 'cfgRow';
+row.className = 'cfgRow cfgRowWrap';
 
 var txt = document.createElement('span');
 txt.innerHTML =
@@ -1333,29 +1407,49 @@ var actWrap =
 document.createElement('div');
 actWrap.className = 'rowActions';
 
+var inputKey = keyPrefix + '_' + tb.id;
+var amtInput =
+document.createElement('input');
+amtInput.type = 'number';
+amtInput.min = '1';
+amtInput.className = 'cfgCustomAmtInput';
+amtInput.value =
+tableCustomInputs[inputKey] || '1';
+amtInput.oninput = function () {
+tableCustomInputs[inputKey] =
+amtInput.value;
+};
+
 var minusBtn =
 document.createElement('button');
 minusBtn.type = 'button';
 minusBtn.className = 'cfgStepBtn';
-minusBtn.textContent = '-1';
+minusBtn.textContent = '−';
 minusBtn.onclick = function () {
+var n =
+parseInt(amtInput.value, 10) || 1;
+if (n <= 0) n = 1;
 sendAction({
 type: 'adjust_table',
 tableId: tb.id,
-delta: -1
+delta: -n
 });
 };
 
 var plusBtn =
 document.createElement('button');
 plusBtn.type = 'button';
-plusBtn.className = 'cfgStepBtn';
-plusBtn.textContent = '+1';
+plusBtn.className =
+'cfgStepBtn stepAddBtn';
+plusBtn.textContent = '+';
 plusBtn.onclick = function () {
+var n =
+parseInt(amtInput.value, 10) || 1;
+if (n <= 0) n = 1;
 sendAction({
 type: 'adjust_table',
 tableId: tb.id,
-delta: 1
+delta: n
 });
 };
 
@@ -1375,14 +1469,57 @@ tableId: tb.id
 true
 );
 
+actWrap.appendChild(amtInput);
 actWrap.appendChild(minusBtn);
 actWrap.appendChild(plusBtn);
 actWrap.appendChild(delBtn);
 
 row.appendChild(txt);
 row.appendChild(actWrap);
-hostTablesList.appendChild(row);
-})(tables[i]);
+return row;
+}
+
+// render tables list in game and settings
+// lets host enter any caps amount per table
+function renderTablesManageSection(s) {
+var d = getDict();
+var tables = s.tables || [];
+var sig =
+JSON.stringify(tables) +
+'_' +
+s.gameMode +
+'_' +
+(s.lang || 'en');
+if (sig === lastTablesSig) return;
+lastTablesSig = sig;
+
+var targets = [
+{ el: hostTablesList, pfx: 'live' },
+{ el: settingsTablesList, pfx: 'set' }
+];
+for (var t = 0; t < targets.length; t++) {
+var box = targets[t].el;
+var pfx = targets[t].pfx;
+if (!box) continue;
+box.innerHTML = '';
+if (tables.length === 0) {
+var empty =
+document.createElement('div');
+empty.className = 'emptyHintBox';
+empty.textContent =
+d.noTablesHost || '';
+box.appendChild(empty);
+continue;
+}
+for (var i = 0; i < tables.length; i++) {
+box.appendChild(
+buildTableControlRow(
+tables[i],
+s,
+pfx
+)
+);
+}
 }
 }
 
@@ -1507,14 +1644,32 @@ prizeGridList.appendChild(row);
 }
 }
 
-// switch between live game and pub settings
-// hides settings controls during live play
+// switch between lock game and settings
+// gates host panel when pub pin is enabled
 function syncActivePubSubView() {
 if (!lastState || lastState.noPubSelected) {
+if (pinLockView) {
+pinLockView.className = 'hidden';
+}
 pubWorkView.className = 'hidden';
 pubSettingsView.className = 'hidden';
 updateStickyTablePin();
 return;
+}
+if (
+lastState.pinEnabled &&
+!isPubPinUnlocked(lastState.pubId)
+) {
+if (pinLockView) {
+pinLockView.className = '';
+}
+pubWorkView.className = 'hidden';
+pubSettingsView.className = 'hidden';
+updateStickyTablePin();
+return;
+}
+if (pinLockView) {
+pinLockView.className = 'hidden';
 }
 if (isSettingsOpen) {
 pubWorkView.className = 'hidden';
@@ -1535,7 +1690,9 @@ return;
 if (
 !lastState ||
 lastState.noPubSelected ||
-isSettingsOpen
+isSettingsOpen ||
+(lastState.pinEnabled &&
+!isPubPinUnlocked(lastState.pubId))
 ) {
 stickyTableBar.className =
 'stickyTableBar';
@@ -1600,6 +1757,9 @@ tvNetBarUrl.textContent = netUrl;
 if (s.noPubSelected || !s.pubId) {
 isSettingsOpen = false;
 pubSelectView.className = '';
+if (pinLockView) {
+pinLockView.className = 'hidden';
+}
 pubWorkView.className = 'hidden';
 pubSettingsView.className = 'hidden';
 lastPubIdSeen = '';
@@ -1619,6 +1779,15 @@ s.paradeGiftText || '';
 if (renamePubInput) {
 renamePubInput.value = s.pubName || '';
 }
+if (pinCodeInput) {
+pinCodeInput.value = '';
+}
+if (pinConfigMsg) {
+pinConfigMsg.className = 'cfgMsg hidden';
+}
+if (pinUnlockMsg) {
+pinUnlockMsg.className = 'cfgMsg hidden';
+}
 paradeBonusMsg.className =
 'cfgMsg hidden';
 syncParadeModeUi();
@@ -1629,6 +1798,14 @@ document.getElementById('hostHeaderTitle');
 if (hdrEl) {
 hdrEl.textContent =
 s.pubName || d.hostHeader;
+}
+var lockHdrEl = document.getElementById(
+'pinLockPubTitle'
+);
+if (lockHdrEl) {
+lockHdrEl.textContent =
+(s.pubName || d.hostHeader) +
+' · PIN';
 }
 var setHdrEl = document.getElementById(
 'settingsHeaderTitle'
@@ -1859,25 +2036,44 @@ btnStartStep.innerHTML = d.btnNextPhase;
 btnStartStep.innerHTML = d.btnStartBout;
 }
 
+// sync pin lock switch pill in settings
+if (btnPinToggle) {
+btnPinToggle.className = s.pinEnabled
+? 'switchPill switchOn'
+: 'switchPill';
+}
+if (pinSwitchTxt) {
+pinSwitchTxt.textContent = s.pinEnabled
+? d.switchOn || 'ON'
+: d.switchOff || 'OFF';
+}
+
 // update economy labels by mode
-// switches between pub caps and cash bank
+// keeps custom caps row visible in both modes
 document.getElementById(
 'economySectionTitle'
 ).innerHTML = isCash
 ? d.econCashTitle
 : d.econPubTitle;
-document.getElementById(
-'creditLabel'
-).innerHTML = isCash
+var credLblEl =
+document.getElementById('creditLabel');
+if (credLblEl) {
+credLblEl.innerHTML = d.creditPubLbl;
+credLblEl.style.display = isCash
+? 'none'
+: 'block';
+}
+if (customCapsLbl) {
+customCapsLbl.innerHTML = isCash
 ? d.creditCashLbl
-: d.creditPubLbl;
+: d.customCapsPubLbl;
+}
 
 pubOrderQuickBtns.className = isCash
 ? 'quickOrderWrap hidden'
 : 'quickOrderWrap';
-cashDepositRow.className = isCash
-? 'inputRow wrapInputRow'
-: 'inputRow wrapInputRow hidden';
+cashDepositRow.className =
+'inputRow wrapInputRow';
 document.getElementById(
 'prizeRedeemBlock'
 ).style.display = isCash
@@ -2472,8 +2668,8 @@ false
 );
 };
 
-// bind cash deposit and grid item buttons
-// adds items prizes and tables to pub
+// bind manual caps add and deduct buttons
+// works in both pub mode and cash mode
 document.getElementById(
 'btnAddCashDeposit'
 ).onclick = function () {
@@ -2487,6 +2683,24 @@ tableId: tId,
 delta: delta
 });
 };
+
+var btnSubCashDeposit =
+document.getElementById(
+'btnSubCashDeposit'
+);
+if (btnSubCashDeposit) {
+btnSubCashDeposit.onclick = function () {
+var tId = parseInt(selectTable.value, 10);
+var delta =
+parseInt(cashDepositInput.value, 10) || 0;
+if (!tId || delta <= 0) return;
+sendAction({
+type: 'adjust_table',
+tableId: tId,
+delta: -delta
+});
+};
+}
 
 document.getElementById(
 'btnAddOrderItem'
@@ -2566,6 +2780,144 @@ d.giftRequiredErr || '';
 );
 };
 
+// bind pin lock toggle and save in settings
+// keeps pin off by default until host sets it
+if (btnPinToggle) {
+btnPinToggle.onclick = function () {
+if (!lastState) return;
+var d = getDict();
+var wantOn = !lastState.pinEnabled;
+var codeVal = pinCodeInput
+? pinCodeInput.value.trim()
+: '';
+if (
+wantOn &&
+!codeVal &&
+!lastState.hasPinCode
+) {
+if (pinConfigMsg) {
+pinConfigMsg.className = 'cfgMsg errMsg';
+pinConfigMsg.textContent =
+d.pinRequiredErr || '';
+}
+if (pinCodeInput) pinCodeInput.focus();
+return;
+}
+markPubPinUnlocked(lastState.pubId);
+sendAction(
+{
+type: 'save_pin_settings',
+pinEnabled: wantOn,
+pinCode: codeVal
+},
+function (resp) {
+if (!pinConfigMsg) return;
+if (resp && resp.ok) {
+pinConfigMsg.className = 'cfgMsg okMsg';
+pinConfigMsg.textContent =
+d.pinSavedMsg || '';
+} else {
+pinConfigMsg.className =
+'cfgMsg errMsg';
+pinConfigMsg.textContent =
+d.pinRequiredErr || '';
+}
+}
+);
+};
+}
+
+var btnSavePin =
+document.getElementById('btnSavePin');
+if (btnSavePin) {
+btnSavePin.onclick = function () {
+if (!lastState) return;
+var d = getDict();
+var codeVal = pinCodeInput
+? pinCodeInput.value.trim()
+: '';
+if (!codeVal) {
+if (pinConfigMsg) {
+pinConfigMsg.className = 'cfgMsg errMsg';
+pinConfigMsg.textContent =
+d.pinRequiredErr || '';
+}
+if (pinCodeInput) pinCodeInput.focus();
+return;
+}
+markPubPinUnlocked(lastState.pubId);
+sendAction(
+{
+type: 'save_pin_settings',
+pinEnabled: true,
+pinCode: codeVal
+},
+function (resp) {
+if (pinCodeInput) {
+pinCodeInput.value = '';
+}
+if (!pinConfigMsg) return;
+if (resp && resp.ok) {
+pinConfigMsg.className = 'cfgMsg okMsg';
+pinConfigMsg.textContent =
+d.pinSavedMsg || '';
+} else {
+pinConfigMsg.className =
+'cfgMsg errMsg';
+pinConfigMsg.textContent =
+d.pinRequiredErr || '';
+}
+}
+);
+};
+}
+
+var btnUnlockPin =
+document.getElementById('btnUnlockPin');
+if (btnUnlockPin) {
+btnUnlockPin.onclick = function () {
+if (!lastState) return;
+var d = getDict();
+var tryCode = pinUnlockInput
+? pinUnlockInput.value.trim()
+: '';
+sendAction(
+{
+type: 'verify_pin',
+pin: tryCode
+},
+function (resp) {
+if (resp && resp.ok) {
+if (pinUnlockInput) {
+pinUnlockInput.value = '';
+}
+if (pinUnlockMsg) {
+pinUnlockMsg.className =
+'cfgMsg hidden';
+}
+markPubPinUnlocked(lastState.pubId);
+renderHost(lastState);
+} else if (pinUnlockMsg) {
+pinUnlockMsg.className = 'cfgMsg errMsg';
+pinUnlockMsg.textContent =
+d.pinWrongErr || 'Wrong PIN!';
+}
+}
+);
+};
+}
+
+var btnPinSwitchPub =
+document.getElementById(
+'btnPinSwitchPub'
+);
+if (btnPinSwitchPub) {
+btnPinSwitchPub.onclick = function () {
+isSettingsOpen = false;
+sendAction({ type: 'unselect_pub' });
+};
+}
+
 document.getElementById(
 'btnClaimPrize'
 ).onclick = function () {
@@ -2590,6 +2942,23 @@ name: name
 });
 newTableName.value = '';
 };
+
+var btnSetAddTable =
+document.getElementById(
+'btnSetAddTable'
+);
+if (btnSetAddTable) {
+btnSetAddTable.onclick = function () {
+if (!setNewTableName) return;
+var name = setNewTableName.value.trim();
+if (!name) return;
+sendAction({
+type: 'add_table',
+name: name
+});
+setNewTableName.value = '';
+};
+}
 
 // hydrate host immediately from local backup
 var initCache = loadHostBackup();

@@ -46,6 +46,22 @@
 </div>
 </div>
 
+<div id="pinLockView" class="hidden">
+<div class="topBar">
+<div class="barTitle" id="pinLockPubTitle">HOST PANEL LOCKED</div>
+<button class="btn btnDark btnLangSmall" id="btnPinSwitchPub">← SWITCH PUB</button>
+</div>
+<div class="card formCard">
+<div class="settingTitle" id="pinLockTitle">HOST PANEL LOCKED</div>
+<div class="settingDesc" id="pinLockSub" style="margin-bottom:8px;">Enter the PIN code for this pub to continue:</div>
+<div class="inputRow wrapInputRow">
+<input type="password" inputmode="numeric" id="pinUnlockInput" placeholder="Enter PIN (e.g. 1234)">
+<button class="btn btnGreen btnSmallAdd" id="btnUnlockPin">UNLOCK HOST PANEL</button>
+</div>
+<div id="pinUnlockMsg" class="cfgMsg hidden"></div>
+</div>
+</div>
+
 <div id="pubWorkView" class="hidden">
 <div class="topBar">
 <div class="barTitle" id="hostHeaderTitle">HOST PANEL</div>
@@ -118,9 +134,11 @@
 <div class="card formCard">
 <div class="fieldLabel" id="creditLabel">AWARD CAPS FOR BAR ORDER:</div>
 <div id="pubOrderQuickBtns" class="quickOrderWrap"></div>
-<div id="cashDepositRow" class="inputRow wrapInputRow hidden">
-<input type="number" id="cashDepositInput" value="10" min="1" placeholder="Cash amount">
-<button class="btn btnCopper btnSmallAdd" id="btnAddCashDeposit">+ DEPOSIT</button>
+<div class="fieldLabel" id="customCapsLbl">MANUAL CAPS FOR SELECTED TABLE:</div>
+<div id="cashDepositRow" class="inputRow wrapInputRow">
+<input type="number" id="cashDepositInput" value="5" min="1" placeholder="Caps amount">
+<button class="btn btnCopper btnSmallAdd" id="btnAddCashDeposit">+ ADD</button>
+<button class="btn btnDark btnSmallAdd" id="btnSubCashDeposit">- DEDUCT</button>
 </div>
 
 <div id="prizeRedeemBlock">
@@ -211,6 +229,16 @@
 </div>
 </div>
 
+<div class="sectionTitle" id="secSetTablesTitle">TABLES & CAPS BALANCE</div>
+<div class="card formCard">
+<div class="settingDesc" id="setTablesCardDesc" style="margin-bottom:8px;">Enter any custom amount of caps (or cash) to add or deduct for any table, or add and remove tables.</div>
+<div id="settingsTablesList" class="cfgList"></div>
+<div class="inputRow wrapInputRow">
+<input type="text" id="setNewTableName" placeholder="Table or player name">
+<button class="btn btnDark btnSmallAdd" id="btnSetAddTable">+ TABLE</button>
+</div>
+</div>
+
 <div class="sectionTitle" id="secTourCtrlTitle">TOURNAMENT & EVENING ACTIONS</div>
 <div class="card formCard">
 <div class="settingActionRow">
@@ -254,6 +282,26 @@
 
 <div class="sectionTitle" id="secPubManageTitle">PUB PROFILE & SYSTEM</div>
 <div class="card formCard">
+<div class="settingBlock">
+<div class="switchSettingRow">
+<div class="switchSettingInfo">
+<div class="settingTitle" id="setPinTitle">Host Panel PIN Lock</div>
+<div class="settingDesc" id="setPinDesc">Disabled by default. When enabled, opening the host panel on a new device requires entering your PIN code.</div>
+</div>
+<button type="button" class="switchPill" id="btnPinToggle">
+<span class="switchKnob"></span>
+<span class="switchTxt" id="pinSwitchTxt">OFF</span>
+</button>
+</div>
+<div class="inputRow wrapInputRow" style="margin-top:8px;">
+<input type="password" inputmode="numeric" id="pinCodeInput" placeholder="Enter PIN (e.g. 1234)">
+<button class="btn btnBlue btnSmallAdd" id="btnSavePin">SAVE PIN</button>
+</div>
+<div id="pinConfigMsg" class="cfgMsg hidden"></div>
+</div>
+
+<div class="settingDivider"></div>
+
 <div class="settingBlock">
 <div class="settingTitle" id="setRenamePubTitle">Pub Display Name</div>
 <div class="settingDesc" id="setRenamePubDesc">Shown in the TV header banner and at the top of the host controller.</div>

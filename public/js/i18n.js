@@ -319,11 +319,11 @@ switchOff: 'OFF',
 setParadeBonusTitle:
 'Parade Early-Bet Bonus',
 setParadeBonusDesc:
-'Rewards guests who place opening bets during the Knights Parade before the bracket begins.',
+'Rewards guests who place Tournament Champion bets during the Knights Parade (does not apply to 1st bout bets).',
 setParade20Hint:
-'All bets placed during the Parade automatically receive +20% boosted payout odds.',
+'Tournament Champion bets placed during the Parade automatically receive +20% boosted payout odds.',
 setParadeGiftHint:
-'Winning bets placed during the Parade receive this bar gift in addition to their cap payout:',
+'Winning Tournament Champion bets placed during the Parade receive this bar gift in addition to their cap payout:',
 setOrderCardTitle:
 'BAR ORDER BONUS GRID',
 setOrderCardDesc:
@@ -372,7 +372,36 @@ btnActOpenTv: 'Open TV',
 actDeletePubTitle: 'Delete This Pub',
 actDeletePubDesc:
 'Permanently deletes this pub, its 24 knights, and all its settings from the device.',
-btnActDeletePub: 'Delete Pub'
+btnActDeletePub: 'Delete Pub',
+tvBtnFullscreen: '⛶ FULLSCREEN',
+tvBtnFullscreenOn: '⛶ FULLSCREEN: ON',
+tvBtnSound: '🔊 SOUND',
+tvBtnSoundOn: '🔊 SOUND: ON',
+tvBtnSoundOff: '🔇 SOUND: OFF',
+customCapsPubLbl:
+'MANUAL CAPS FOR SELECTED TABLE:',
+capsInputPlaceholder: 'Caps amount',
+btnAddCapsCustom: '+ ADD',
+btnSubCapsCustom: '- DEDUCT',
+secSetTablesTitle:
+'TABLES & CAPS BALANCE',
+setTablesCardDesc:
+'Enter any custom amount of caps (or cash) to add or deduct for any table, or add and remove tables.',
+setPinTitle: 'Host Panel PIN Lock',
+setPinDesc:
+'Disabled by default. When enabled, opening the host panel on a new device requires entering your PIN code.',
+pinInputPlaceholder:
+'Enter PIN (e.g. 1234)',
+btnSavePin: 'SAVE PIN',
+pinSavedMsg: '✓ PIN settings saved!',
+pinRequiredErr:
+'Enter a PIN code before turning PIN lock ON!',
+pinLockTitle: 'HOST PANEL LOCKED',
+pinLockSub:
+'Enter the PIN code for this pub to continue:',
+btnUnlockPin: 'UNLOCK HOST PANEL',
+pinWrongErr:
+'Wrong PIN code! Try again.'
 },
 
 uk: {
@@ -697,11 +726,11 @@ switchOff: 'ВИМК',
 setParadeBonusTitle:
 'Бонус за ставку під час параду',
 setParadeBonusDesc:
-'Заохочує гостей робити перші ставки під час відкриваючого параду лицарів до початку турнірної сітки.',
+'Заохочує гостей робити ставки на Чемпіона Турніру під час параду лицарів (не діє на ставки на 1-й бій).',
 setParade20Hint:
-'Усі ставки, прийняті під час параду, автоматично отримують +20% до коефіцієнта виплати.',
+'Ставки на Чемпіона Турніру, прийняті під час параду, автоматично отримують +20% до коефіцієнта виплати.',
 setParadeGiftHint:
-'Переможні ставки, зроблені на параді, приносять столу цей подарунок від бару разом із виплатою:',
+'Переможні ставки на Чемпіона Турніру, зроблені на параді, приносять столу цей подарунок від бару разом із виплатою:',
 setOrderCardTitle:
 'НАРАХУВАННЯ КРИШОК ЗА ЗАМОВЛЕННЯ',
 setOrderCardDesc:
@@ -751,7 +780,40 @@ btnActOpenTv: 'Екран ТБ',
 actDeletePubTitle: 'Видалити цей паб',
 actDeletePubDesc:
 'Безповоротно видаляє цей паб, його 24 лицарів та всі налаштування з пам’яті пристрою.',
-btnActDeletePub: 'Видалити паб'
+btnActDeletePub: 'Видалити паб',
+tvBtnFullscreen: '⛶ ПОВНИЙ ЕКРАН',
+tvBtnFullscreenOn:
+'⛶ ПОВНИЙ ЕКРАН: УВІМК',
+tvBtnSound: '🔊 ЗВУК',
+tvBtnSoundOn: '🔊 ЗВУК: УВІМК',
+tvBtnSoundOff: '🔇 ЗВУК: ВИМК',
+customCapsPubLbl:
+'БУДЬ-ЯКА СУМА КРИШОК ОБРАНОМУ СТОЛУ:',
+capsInputPlaceholder: 'Кількість кришок',
+btnAddCapsCustom: '+ ДОДАТИ',
+btnSubCapsCustom: '- СПИСАТИ',
+secSetTablesTitle:
+'СТОЛИ ТА БАЛАНС КРИШОК',
+setTablesCardDesc:
+'Введіть будь-яку кількість кришок (або грошей) для нарахування чи списання з будь-якого столу, або додайте новий стіл.',
+setPinTitle:
+'Захист пульта PIN-кодом',
+setPinDesc:
+'За замовчуванням вимкнено. Коли увімкнено, вхід у пульт ведучого з нового пристрою вимагає введення PIN-коду.',
+pinInputPlaceholder:
+'Введіть PIN (напр. 1234)',
+btnSavePin: 'ЗБЕРЕГТИ PIN',
+pinSavedMsg:
+'✓ Налаштування PIN збережено!',
+pinRequiredErr:
+'Введіть PIN-код перед увімкненням захисту!',
+pinLockTitle:
+'ПУЛЬТ ЗАХИЩЕНО PIN-КОДОМ',
+pinLockSub:
+'Введіть PIN-код цього пабу для доступу до керування:',
+btnUnlockPin: 'УВІЙТИ В ПУЛЬТ',
+pinWrongErr:
+'Невірний PIN-код! Спробуйте ще раз.'
 },
 
 ru: {
@@ -1076,11 +1138,11 @@ switchOff: 'ВЫКЛ',
 setParadeBonusTitle:
 'Бонус за ставку во время парада',
 setParadeBonusDesc:
-'Поощряет гостей делать первые ставки во время открывающего парада рыцарей до перехода к турнирной сетке.',
+'Поощряет гостей делать ставки на Чемпиона Турнира во время парада рыцарей (не действует на ставки на 1-й бой).',
 setParade20Hint:
-'Все ставки, принятые во время парада, автоматически получают +20% к коэффициенту выплаты.',
+'Ставки на Чемпиона Турнира, принятые во время парада, автоматически получают +20% к коэффициенту выплаты.',
 setParadeGiftHint:
-'Выигравшие ставки, сделанные на параде, приносят столу этот подарок от бара помимо выплаты крышек:',
+'Выигравшие ставки на Чемпиона Турнира, сделанные на параде, приносят столу этот подарок от бара помимо выплаты крышек:',
 setOrderCardTitle:
 'НАЧИСЛЕНИЕ КРЫШЕК ЗА ЗАКАЗЫ',
 setOrderCardDesc:
@@ -1130,7 +1192,39 @@ btnActOpenTv: 'Экран ТВ',
 actDeletePubTitle: 'Удалить этот паб',
 actDeletePubDesc:
 'Безвозвратно удаляет этот паб, его 24 рыцаря и все настройки из памяти устройства.',
-btnActDeletePub: 'Удалить паб'
+btnActDeletePub: 'Удалить паб',
+tvBtnFullscreen: '⛶ ФУЛСКРИН',
+tvBtnFullscreenOn: '⛶ ФУЛСКРИН: ВКЛ',
+tvBtnSound: '🔊 ЗВУК',
+tvBtnSoundOn: '🔊 ЗВУК: ВКЛ',
+tvBtnSoundOff: '🔇 ЗВУК: ВЫКЛ',
+customCapsPubLbl:
+'ЛЮБАЯ СУММА КРЫШЕК ВЫБРАННОМУ СТОЛУ:',
+capsInputPlaceholder: 'Сумма крышек',
+btnAddCapsCustom: '+ НАЧИСЛИТЬ',
+btnSubCapsCustom: '- СПИСАТЬ',
+secSetTablesTitle:
+'СТОЛЫ И БАЛАНС КРЫШЕК',
+setTablesCardDesc:
+'Введите любую сумму крышек (или денег) для начисления или списания любому столу, либо добавьте новый стол.',
+setPinTitle:
+'Защита пульта PIN-кодом',
+setPinDesc:
+'По умолчанию выключено. Когда включено, вход в пульт ведущего с нового телефона требует ввода PIN-кода.',
+pinInputPlaceholder:
+'Введите PIN (напр. 1234)',
+btnSavePin: 'СОХРАНИТЬ PIN',
+pinSavedMsg:
+'✓ Настройки PIN сохранены!',
+pinRequiredErr:
+'Введите PIN-код перед включением защиты!',
+pinLockTitle:
+'ПУЛЬТ ЗАЩИЩЁН PIN-КОДОМ',
+pinLockSub:
+'Введите PIN-код этого паба для доступа к управлению:',
+btnUnlockPin: 'ВОЙТИ В ПУЛЬТ',
+pinWrongErr:
+'Неверный PIN-код! Попробуйте ещё раз.'
 }
 };
 

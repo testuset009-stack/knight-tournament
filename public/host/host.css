@@ -691,6 +691,24 @@ display: flex;
 align-items: center;
 gap: 5px;
 flex-shrink: 0;
+flex-wrap: wrap;
+}
+
+.cfgRowWrap {
+flex-wrap: wrap;
+}
+
+.cfgCustomAmtInput {
+width: 56px;
+height: 34px;
+background: #0F172A;
+color: #FFFFFF;
+border: 1px solid #38BDF8;
+border-radius: 6px;
+padding: 0 6px;
+font-size: 13px;
+font-weight: 800;
+text-align: center;
 }
 
 .cfgStepBtn {
@@ -698,12 +716,17 @@ background: #1E293B;
 color: #F8FAFC;
 border: 1px solid #334155;
 border-radius: 6px;
-min-width: 38px;
+min-width: 36px;
 height: 34px;
 font-size: 13px;
 font-weight: 800;
 cursor: pointer;
 padding: 0 7px;
+}
+
+.cfgStepBtn.stepAddBtn {
+background: #065F46;
+border-color: #10B981;
 }
 
 .cfgRefundBtn {

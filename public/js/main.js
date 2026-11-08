@@ -74,6 +74,135 @@ var pCanvasRight =
 document.getElementById('previewCanvasRight');
 var arenaCanvas =
 document.getElementById('arenaCanvas');
+var btnTvFullscreen =
+document.getElementById('btnTvFullscreen');
+var btnTvSound =
+document.getElementById('btnTvSound');
+var tvSoundActivated = false;
+
+// check if browser is in fullscreen mode
+// covers standard and vendor prefixes
+function isTvFullscreen() {
+return Boolean(
+document.fullscreenElement ||
+document.webkitFullscreenElement ||
+document.mozFullScreenElement ||
+document.msFullscreenElement ||
+document.webkitCurrentFullScreenElement
+);
+}
+
+// request fullscreen on document or body
+// falls back across smart tv engines
+function enterTvFullscreen() {
+var el = document.documentElement;
+var b = document.body;
+try {
+if (el.requestFullscreen) {
+var p = el.requestFullscreen({
+navigationUI: 'hide'
+});
+if (p && p.catch) {
+p.catch(function () {
+try {
+el.requestFullscreen();
+} catch (e) {}
+});
+}
+return;
+}
+if (el.webkitRequestFullscreen) {
+el.webkitRequestFullscreen();
+return;
+}
+if (el.webkitRequestFullScreen) {
+el.webkitRequestFullScreen();
+return;
+}
+if (el.mozRequestFullScreen) {
+el.mozRequestFullScreen();
+return;
+}
+if (el.msRequestFullscreen) {
+el.msRequestFullscreen();
+return;
+}
+if (b && b.webkitRequestFullscreen) {
+b.webkitRequestFullscreen();
+}
+} catch (e) {
+// skip fullscreen error
+}
+}
+
+// exit fullscreen across vendor prefixes
+// restores windowed browser mode
+function exitTvFullscreen() {
+try {
+if (document.exitFullscreen) {
+document.exitFullscreen();
+return;
+}
+if (document.webkitExitFullscreen) {
+document.webkitExitFullscreen();
+return;
+}
+if (document.webkitCancelFullScreen) {
+document.webkitCancelFullScreen();
+return;
+}
+if (document.mozCancelFullScreen) {
+document.mozCancelFullScreen();
+return;
+}
+if (document.msExitFullscreen) {
+document.msExitFullscreen();
+}
+} catch (e) {
+// skip exit error
+}
+}
+
+// update fullscreen and sound button labels
+// reflects active fullscreen and mute state
+function syncWaitingStartBtns() {
+var d = getDict();
+if (btnTvFullscreen) {
+var fsOn = isTvFullscreen();
+btnTvFullscreen.innerHTML = fsOn
+? d.tvBtnFullscreenOn ||
+'⛶ FULLSCREEN: ON'
+: d.tvBtnFullscreen || '⛶ FULLSCREEN';
+btnTvFullscreen.className = fsOn
+? 'waitingBigBtn activeTvBtn'
+: 'waitingBigBtn';
+}
+if (btnTvSound) {
+var srvMuted = Boolean(
+currentState && currentState.tvMuted
+);
+var locMuted = Boolean(
+window.GameSound &&
+window.GameSound.isMuted()
+);
+var isMuted = srvMuted || locMuted;
+if (isMuted) {
+btnTvSound.innerHTML =
+d.tvBtnSoundOff || '🔇 SOUND: OFF';
+btnTvSound.className =
+'waitingBigBtn mutedTvBtn';
+} else if (tvSoundActivated) {
+btnTvSound.innerHTML =
+d.tvBtnSoundOn || '🔊 SOUND: ON';
+btnTvSound.className =
+'waitingBigBtn activeTvBtn';
+} else {
+btnTvSound.innerHTML =
+d.tvBtnSound || '🔊 SOUND';
+btnTvSound.className = 'waitingBigBtn';
+}
+}
+}
 
 // get dictionary for active state language
 // defaults to english when lang is unset
@@ -109,8 +238,6 @@ if (el && val) el.innerHTML = val;
 };
 
 setTxt('waitingBrandText', d.brandTitle);
-setTxt('waitingSubText', d.waitingSub);
-setTxt('waitingNetLabel', d.waitingNetLbl);
 setTxt('colHeadQfWest', d.qfWest);
 setTxt('colHeadQfEast', d.qfEast);
 setTxt('colHeadSfLeft', d.sfHeader);
@@ -118,6 +245,7 @@ setTxt('colHeadSfRight', d.sfHeader);
 setTxt('colHeadFinal', d.grandFinalHeader);
 setTxt('champKickerText', d.champKicker);
 setTxt('champNoticeText', d.champLore);
+syncWaitingStartBtns();
 }
 
 // spawn wood or steel debris particles
@@ -1059,6 +1187,7 @@ if (tvBottomBar) {
 tvBottomBar.className = 'bottomBar hidden';
 }
 prizeToast.className = 'prizeBanner hidden';
+syncWaitingStartBtns();
 drawWaitingFrame();
 return;
 }
@@ -1978,6 +2107,76 @@ tapTimes = [];
 window.location.href = '/host';
 }
 };
+}
+
+// bind waiting screen fullscreen and sound
+// unlocks audio and enters tv fullscreen
+if (btnTvFullscreen) {
+btnTvFullscreen.onclick = function () {
+if (window.GameSound) {
+window.GameSound.unlock();
+}
+if (isTvFullscreen()) {
+exitTvFullscreen();
+} else {
+enterTvFullscreen();
+}
+setTimeout(syncWaitingStartBtns, 120);
+};
+}
+
+if (btnTvSound) {
+btnTvSound.onclick = function () {
+if (window.GameSound) {
+window.GameSound.unlock();
+}
+var srvMuted = Boolean(
+currentState && currentState.tvMuted
+);
+var locMuted = Boolean(
+window.GameSound &&
+window.GameSound.isMuted()
+);
+if (!tvSoundActivated || srvMuted || locMuted) {
+tvSoundActivated = true;
+if (window.GameSound) {
+window.GameSound.setMuted(false);
+}
+if (
+currentState &&
+!currentState.noPubSelected &&
+currentState.tvMuted
+) {
+postTvAction({ type: 'toggle_tv_mute' });
+}
+if (window.GameSound) {
+window.GameSound.playHorn();
+}
+} else {
+if (
+currentState &&
+!currentState.noPubSelected
+) {
+postTvAction({ type: 'toggle_tv_mute' });
+} else if (window.GameSound) {
+window.GameSound.toggleMute();
+}
+}
+syncWaitingStartBtns();
+};
+}
+
+var fsEvents = [
+'fullscreenchange',
+'webkitfullscreenchange',
+'mozfullscreenchange',
+'MSFullscreenChange'
+];
+for (var f = 0; f < fsEvents.length; f++) {
+document.addEventListener(
+fsEvents[f],
+syncWaitingStartBtns
+);
 }
 
 // hydrate immediately from local backup on boot

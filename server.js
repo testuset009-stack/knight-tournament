@@ -505,6 +505,8 @@ pubSeed: seed,
 gameMode: 'PUB',
 allowLiveBets: true,
 tvMuted: false,
+pinEnabled: false,
+pinCode: '',
 paradeBonusType: 'PERCENT_20',
 paradeGiftText: '',
 tournamentNumber: 0,
@@ -1973,6 +1975,7 @@ pubSeed: p.pubSeed,
 tournamentNumber:
 p.tournamentNumber || 0,
 gameMode: p.gameMode || 'PUB',
+pinEnabled: Boolean(p.pinEnabled),
 tablesCount: (p.tables || []).length,
 prizesCount: (p.prizes || []).length,
 ordersCount: (p.orderGrid || []).length
@@ -2014,6 +2017,10 @@ gameState.paradeGiftText =
 pubData.paradeGiftText || '';
 gameState.tvMuted =
 Boolean(pubData.tvMuted);
+gameState.pinEnabled =
+Boolean(pubData.pinEnabled);
+gameState.hasPinCode =
+Boolean(pubData.pinCode);
 gameState.pubsSummary = getPubsSummary();
 gameState.rosterBackup = pubData.roster;
 var out = Object.assign({}, gameState);
@@ -2583,9 +2590,13 @@ state: buildClientResponse()
 return;
 }
 
-// apply parade bonus: gift on win or +20%
+// apply parade bonus only to outright bet
+// first bout bets keep standard match odds
 var paradeGift = null;
-if (gameState.tvScreen === 'PARADE') {
+if (
+gameState.tvScreen === 'PARADE' &&
+bType === 'OUTRIGHT'
+) {
 if (
 pubData.paradeBonusType === 'GIFT' &&
 pubData.paradeGiftText
@@ -2725,6 +2736,49 @@ pubData.name = nextName;
 gameState.pubName = nextName;
 savePubData(pubData);
 }
+} else if (type === 'save_pin_settings') {
+// save optional host pin lock settings
+// requires pin code before turning on
+var wantPinOn = Boolean(body.pinEnabled);
+var rawPin = String(
+body.pinCode || ''
+).trim();
+if (rawPin) {
+pubData.pinCode = rawPin;
+}
+if (wantPinOn && !pubData.pinCode) {
+res.json({
+ok: false,
+errorCode: 'PIN_REQUIRED',
+state: buildClientResponse()
+});
+return;
+}
+pubData.pinEnabled = wantPinOn;
+gameState.pinEnabled = wantPinOn;
+gameState.hasPinCode =
+Boolean(pubData.pinCode);
+savePubData(pubData);
+} else if (type === 'verify_pin') {
+// check entered pin against pub pin code
+// unlocks host phone when pin matches
+var tryPin = String(body.pin || '').trim();
+if (
+!pubData.pinEnabled ||
+pubData.pinCode === tryPin
+) {
+res.json({
+ok: true,
+state: buildClientResponse()
+});
+} else {
+res.json({
+ok: false,
+errorCode: 'BAD_PIN',
+state: buildClientResponse()
+});
+}
+return;
 } else if (type === 'delete_pub') {
 // remove active pub from multi-pub store
 // returns host and tv to waiting screen
