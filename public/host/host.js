@@ -1849,6 +1849,12 @@ btnStartStep.innerHTML = d.btnNextPhase;
 btnStartStep.innerHTML =
 d.btnPhaseRunning;
 }
+} else if (
+s.combat &&
+s.combat.active &&
+!s.combat.finished
+) {
+btnStartStep.innerHTML = d.btnNextPhase;
 } else {
 btnStartStep.innerHTML = d.btnStartBout;
 }
@@ -2363,7 +2369,8 @@ if (
 betMode === 'MATCH' &&
 (!curM ||
 curM.status === 'DONE' ||
-cSt.finished)
+(lastState.tvScreen === 'COMBAT' &&
+cSt.finished))
 ) {
 showBetFeedback(
 getBetErrorText('BOUT_DONE', lastState),

@@ -2406,10 +2406,39 @@ subStep: 'RIDE_TO_RACK',
 finished: false,
 bonusActive: true
 };
+if (gameState.combat) {
+gameState.combat.active = false;
+gameState.combat.finished = false;
+gameState.combat.pausedForBets = false;
+}
 gameState.soundToPlay = 'horn';
 } else if (type === 'toggle_screen') {
 if (gameState.tvScreen === 'COMBAT') {
 gameState.tvScreen = 'BRACKET';
+if (
+gameState.combat &&
+gameState.combat.finished
+) {
+gameState.combat.active = false;
+gameState.combat.finished = false;
+gameState.combat.pausedForBets = false;
+gameState.statusKey =
+gameState.tournamentStatus === 'FINISHED'
+? 'CHAMP_DONE'
+: 'NEXT_BETS';
+gameState.statusText = getStatusStr(
+gameState.statusKey,
+gameState.lang
+);
+if (
+gameState.tournamentStatus !==
+'FINISHED' &&
+gameState.currentMatchIndex < 6
+) {
+gameState.currentMatchIndex += 1;
+}
+updateAllOdds(gameState);
+}
 } else if (
 gameState.tvScreen === 'BRACKET' &&
 gameState.combat &&
@@ -2477,7 +2506,8 @@ errCode = 'TOUR_FINISHED';
 bType === 'MATCH' &&
 (!curMatch ||
 curMatch.status === 'DONE' ||
-cState.finished)
+(gameState.tvScreen === 'COMBAT' &&
+cState.finished))
 ) {
 errCode = 'BOUT_DONE';
 } else if (
@@ -2844,6 +2874,65 @@ state: buildClientResponse()
 return;
 }
 
+// allow returning to bracket after final bout
+if (
+gameState.tvScreen === 'COMBAT' &&
+gameState.combat
+) {
+var cElapsedMs =
+Date.now() - (gameState.lastStepAt || 0);
+var minStepMs =
+gameState.combat.mode === 'JOUST'
+? 3250
+: 4750;
+if (cElapsedMs < minStepMs) {
+saveGameState(gameState);
+res.json({
+ok: true,
+state: buildClientResponse()
+});
+return;
+}
+if (gameState.combat.finished) {
+gameState.tvScreen = 'BRACKET';
+gameState.combat.active = false;
+gameState.combat.finished = false;
+gameState.combat.pausedForBets = false;
+gameState.statusKey =
+gameState.tournamentStatus === 'FINISHED'
+? 'CHAMP_DONE'
+: 'NEXT_BETS';
+gameState.statusText = getStatusStr(
+gameState.statusKey,
+gameState.lang
+);
+if (
+gameState.tournamentStatus !==
+'FINISHED' &&
+gameState.currentMatchIndex < 6
+) {
+gameState.currentMatchIndex += 1;
+}
+updateAllOdds(gameState);
+saveGameState(gameState);
+res.json({
+ok: true,
+state: buildClientResponse()
+});
+return;
+}
+if (gameState.combat.pausedForBets) {
+gameState.lastStepAt = Date.now();
+runNextCombatPhase();
+saveGameState(gameState);
+res.json({
+ok: true,
+state: buildClientResponse()
+});
+return;
+}
+}
+
 var curM =
 gameState.matches[
 gameState.currentMatchIndex
@@ -2863,6 +2952,23 @@ return;
 }
 
 if (gameState.tvScreen !== 'COMBAT') {
+if (
+gameState.combat &&
+gameState.combat.active &&
+!gameState.combat.finished
+) {
+gameState.tvScreen = 'COMBAT';
+if (gameState.combat.pausedForBets) {
+gameState.lastStepAt = Date.now();
+runNextCombatPhase();
+}
+saveGameState(gameState);
+res.json({
+ok: true,
+state: buildClientResponse()
+});
+return;
+}
 gameState.tvScreen = 'COMBAT';
 gameState.statusKey = 'BOUT_ACTIVE';
 gameState.statusText = getStatusStr(
@@ -2901,26 +3007,14 @@ localizeCombatTexts(gameState);
 gameState.lastStepAt = Date.now();
 gameState.soundToPlay = 'horn';
 runNextCombatPhase();
-} else if (gameState.combat.finished) {
-gameState.tvScreen = 'BRACKET';
-gameState.statusKey =
-gameState.tournamentStatus === 'FINISHED'
-? 'CHAMP_DONE'
-: 'NEXT_BETS';
-gameState.statusText = getStatusStr(
-gameState.statusKey,
-gameState.lang
-);
-if (gameState.currentMatchIndex < 6) {
-gameState.currentMatchIndex += 1;
-}
-updateAllOdds(gameState);
-} else if (gameState.combat.pausedForBets) {
-gameState.lastStepAt = Date.now();
-runNextCombatPhase();
 }
 } else if (type === 'next_match') {
 gameState.tvScreen = 'BRACKET';
+if (gameState.combat) {
+gameState.combat.active = false;
+gameState.combat.finished = false;
+gameState.combat.pausedForBets = false;
+}
 if (
 gameState.currentMatchIndex < 6 &&
 gameState.matches[
