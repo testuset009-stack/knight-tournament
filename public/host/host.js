@@ -95,6 +95,14 @@ document.getElementById('tabBetOutright');
 
 var selectTable =
 document.getElementById('selectTable');
+var stickyTableSlot =
+document.getElementById(
+'stickyTableSlot'
+);
+var stickyTableBar =
+document.getElementById(
+'stickyTableBar'
+);
 var selectPrize =
 document.getElementById('selectPrize');
 var knightVisualGrid =
@@ -1505,6 +1513,7 @@ function syncActivePubSubView() {
 if (!lastState || lastState.noPubSelected) {
 pubWorkView.className = 'hidden';
 pubSettingsView.className = 'hidden';
+updateStickyTablePin();
 return;
 }
 if (isSettingsOpen) {
@@ -1514,7 +1523,56 @@ pubSettingsView.className = '';
 pubWorkView.className = '';
 pubSettingsView.className = 'hidden';
 }
+updateStickyTablePin();
 }
+
+// pin active table bar to top on scroll
+// reserves slot height so layout stays steady
+function updateStickyTablePin() {
+if (!stickyTableSlot || !stickyTableBar) {
+return;
+}
+if (
+!lastState ||
+lastState.noPubSelected ||
+isSettingsOpen
+) {
+stickyTableBar.className =
+'stickyTableBar';
+stickyTableSlot.style.height = 'auto';
+return;
+}
+var rect =
+stickyTableSlot.getBoundingClientRect();
+if (rect.top <= 6) {
+var h = stickyTableBar.offsetHeight;
+if (h > 0) {
+stickyTableSlot.style.height = h + 'px';
+}
+if (
+stickyTableBar.className.indexOf(
+'fixedTopBar'
+) === -1
+) {
+stickyTableBar.className =
+'stickyTableBar fixedTopBar';
+}
+} else {
+stickyTableBar.className =
+'stickyTableBar';
+stickyTableSlot.style.height = 'auto';
+}
+}
+
+window.addEventListener(
+'scroll',
+updateStickyTablePin,
+{ passive: true }
+);
+window.addEventListener(
+'resize',
+updateStickyTablePin
+);
 
 // update host controller dom from state
 // switches between pub selector and work view
