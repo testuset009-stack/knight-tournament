@@ -27,28 +27,28 @@ padding-bottom: 36px;
 }
 
 /* top header bar on phone */
-/* we show title and tournament number */
+/* puts pub name on its own full line */
 .topBar {
 min-height: 48px;
 background: #131C2E;
 border: 1px solid #1E293B;
 border-radius: 8px;
-padding: 8px 12px;
+padding: 10px 12px;
 margin-bottom: 12px;
 display: flex;
-align-items: center;
-justify-content: space-between;
+flex-direction: column;
+align-items: stretch;
 gap: 8px;
 }
 
 .barTitle {
-font-size: 16px;
+font-size: 17px;
 font-weight: 800;
 color: #38BDF8;
-min-width: 0;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
+width: 100%;
+line-height: 1.25;
+white-space: normal;
+word-break: break-word;
 }
 
 .barBadge {
@@ -654,13 +654,15 @@ border: 1px solid #10B981;
 color: #A7F3D0;
 }
 
-/* header right group and sound toggle */
-/* keeps settings and sound easy to tap */
+/* header second row for badge and settings */
+/* spreads tournament badge and button */
 .topBarRight {
 display: flex;
-gap: 6px;
+width: 100%;
+gap: 8px;
 align-items: center;
-flex-shrink: 0;
+justify-content: space-between;
+flex-wrap: wrap;
 }
 
 .statusSubRow {
