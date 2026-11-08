@@ -140,14 +140,6 @@ var pubOrderQuickBtns =
 document.getElementById(
 'pubOrderQuickBtns'
 );
-var customCapsLbl =
-document.getElementById('customCapsLbl');
-var cashDepositRow =
-document.getElementById('cashDepositRow');
-var cashDepositInput =
-document.getElementById(
-'cashDepositInput'
-);
 var orderGridList =
 document.getElementById('orderGridList');
 var orderItemInput =
@@ -528,14 +520,6 @@ setTxt(
 d.btnAddOrderItem
 );
 setTxt(
-'btnAddCashDeposit',
-d.btnAddCapsCustom
-);
-setTxt(
-'btnSubCashDeposit',
-d.btnSubCapsCustom
-);
-setTxt(
 'secPrizeGridTitle',
 d.setPrizeCardTitle
 );
@@ -684,10 +668,6 @@ d.orderItemPlaceholder || '';
 if (orderCapsInput) {
 orderCapsInput.placeholder =
 d.orderCapsPlaceholder || '';
-}
-if (cashDepositInput) {
-cashDepositInput.placeholder =
-d.capsInputPlaceholder || '';
 }
 if (prizeCostInput) {
 prizeCostInput.placeholder =
@@ -2049,7 +2029,7 @@ pinSwitchTxt.textContent = s.pinEnabled
 }
 
 // update economy labels by mode
-// keeps custom caps row visible in both modes
+// toggles pub order buttons and prizes
 document.getElementById(
 'economySectionTitle'
 ).innerHTML = isCash
@@ -2063,17 +2043,10 @@ credLblEl.style.display = isCash
 ? 'none'
 : 'block';
 }
-if (customCapsLbl) {
-customCapsLbl.innerHTML = isCash
-? d.creditCashLbl
-: d.customCapsPubLbl;
-}
 
 pubOrderQuickBtns.className = isCash
 ? 'quickOrderWrap hidden'
 : 'quickOrderWrap';
-cashDepositRow.className =
-'inputRow wrapInputRow';
 document.getElementById(
 'prizeRedeemBlock'
 ).style.display = isCash
@@ -2667,40 +2640,6 @@ false
 }
 );
 };
-
-// bind manual caps add and deduct buttons
-// works in both pub mode and cash mode
-document.getElementById(
-'btnAddCashDeposit'
-).onclick = function () {
-var tId = parseInt(selectTable.value, 10);
-var delta =
-parseInt(cashDepositInput.value, 10) || 0;
-if (!tId || delta <= 0) return;
-sendAction({
-type: 'add_credit',
-tableId: tId,
-delta: delta
-});
-};
-
-var btnSubCashDeposit =
-document.getElementById(
-'btnSubCashDeposit'
-);
-if (btnSubCashDeposit) {
-btnSubCashDeposit.onclick = function () {
-var tId = parseInt(selectTable.value, 10);
-var delta =
-parseInt(cashDepositInput.value, 10) || 0;
-if (!tId || delta <= 0) return;
-sendAction({
-type: 'adjust_table',
-tableId: tId,
-delta: -delta
-});
-};
-}
 
 document.getElementById(
 'btnAddOrderItem'
